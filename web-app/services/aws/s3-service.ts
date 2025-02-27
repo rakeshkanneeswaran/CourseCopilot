@@ -10,20 +10,25 @@ const s3 = new S3Client({
 });
 
 export class S3Service {
-    static async uploadVideoFile({ bucket, formData }: { bucket: string, formData: FormData }) {
+    static async uploadVideoFile({ bucket, formData, userData }: {
+        bucket: string, formData: FormData, userData: {
+            userId: string,
+            projectId: string
+        }
+    }) {
         try {
             const file = formData.get("file");
             if (!(file instanceof File)) {
                 return { success: false, error: "Invalid file provided." };
             }
             const buffer = Buffer.from(await file.arrayBuffer());
-            const key = crypto.randomUUID();
+            const uploadedFile = formData.get("file") as File;
+            const key = uploadedFile.name;
             const putObjectCommand = new PutObjectCommand({
                 Bucket: bucket,
-                Key: key,
+                Key: `${userData.userId}/${userData.projectId}/${key}`,
                 Body: buffer,
                 ContentType: file.type,
-
             });
 
             const result = await s3.send(putObjectCommand);
