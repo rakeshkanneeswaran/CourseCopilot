@@ -1,6 +1,6 @@
 "use server"
 
-import { VideoService } from "@/services/video-service";
+import { VideoService } from "@/data-core/services/video-service";
 export async function uploadVideo(formData: FormData, userData: { userId: string, projectId: string }) {
     try {
         const result = await VideoService.uploadVideo(formData, userData)

@@ -1,5 +1,5 @@
 "use server"
-import { ProjectService } from "@/services/project-service"
+import { ProjectService } from "@/data-core/services/project-service"
 
 export async function createProject({ userId, title, description }: { userId: string, title: string, description: string }) {
     try {

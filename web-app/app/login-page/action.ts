@@ -1,5 +1,5 @@
 "use server"
-import { UserService } from "@/services/user-service"
+import { UserService } from "@/data-core/services/user-service"
 
 export async function userLogin({ username, password }: { username: string, password: string }) {
     try {
