@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
-import { uploadVideo } from "./actions";
+import { uploadVideo, initiateBackground } from "./actions";
 
 export default function VideoUploadPage() {
   const [videoFiles, setVideoFiles] = useState<File[]>([]);
@@ -51,9 +51,36 @@ export default function VideoUploadPage() {
       });
       const formData = new FormData();
       formData.append("file", renamedFile);
-
       await uploadVideo(formData, { userId, projectId });
     }
+
+    const projectMetaData = {
+      generate_translate: translate,
+      generate_subtitle: includeSubtitles,
+      languages: selectedLanguages,
+      generate_transcript: generateTranscript,
+    };
+
+    if (
+      !projectId ||
+      !userId ||
+      Array.isArray(projectId) ||
+      Array.isArray(userId)
+    ) {
+      return;
+    }
+
+    const result = await initiateBackground({
+      userId,
+      projectId,
+      projectMetaData,
+    });
+
+    if (!result) {
+      alert("Failed to initiate background process");
+      return;
+    }
+
     setUploading(false);
     alert("Videos uploaded successfully!");
   };
