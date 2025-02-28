@@ -85,15 +85,26 @@ export default function VideoUploadPage() {
           onChange={handleFileChange}
           className="mt-4 mb-4"
         />
-
-        <div className="grid grid-cols-3 gap-3 w-full">
+        <div className="flex flex-col gap-4">
           {previewUrls.map((url, index) => (
-            <video
+            <div
               key={index}
-              src={url}
-              controls
-              className="w-32 h-32 rounded-lg shadow-md"
-            />
+              className="flex items-center gap-4 bg-gray-100 p-4 rounded-lg shadow-md"
+            >
+              <video
+                src={url}
+                controls
+                className="w-48 h-48 rounded-lg shadow-lg"
+                onLoadedMetadata={(e) => e.currentTarget.pause()}
+                preload="metadata"
+              />
+              <div className="text-black flex flex-col font-semibold">
+                Video file name: {videoFiles[index].name}
+                <br />
+                playlist order: {index + 1}
+                <br />
+              </div>
+            </div>
           ))}
         </div>
       </div>
@@ -163,7 +174,7 @@ function Switch({
   return (
     <div
       className={`relative w-12 h-6 flex items-center bg-gray-300 rounded-full p-1 cursor-pointer transition ${
-        enabled ? "bg-green-600" : "bg-gray-300"
+        enabled ? "bg-red-500" : "bg-gray-300"
       }`}
       onClick={() => onChange(!enabled)}
     >
@@ -194,7 +205,7 @@ function Button({
         transition ${
           disabled
             ? "bg-gray-400 cursor-not-allowed"
-            : "bg-green-600 hover:bg-green-700"
+            : "bg-red-500 hover:bg-red-700"
         }`}
     >
       {children}
