@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { uploadVideo, initiateBackground } from "./actions";
 
 export default function VideoUploadPage() {
@@ -12,7 +12,9 @@ export default function VideoUploadPage() {
   const [includeSubtitles, setIncludeSubtitles] = useState(false);
   const [generateTranscript, setGenerateTranscript] = useState(false);
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
+  const [showModal, setShowModal] = useState(false);
   const params = useParams();
+  const router = useRouter();
   const projectId = params.projectId;
   const userId = params.userId;
 
@@ -82,7 +84,9 @@ export default function VideoUploadPage() {
     }
 
     setUploading(false);
-    alert("Videos uploaded successfully!");
+    alert(
+      "Videos uploaded successfully! , You will be notified when the processing is complete. or you can check the status in the dashboard"
+    );
   };
 
   const handleLanguageChange = (language: string) => {
@@ -186,6 +190,17 @@ export default function VideoUploadPage() {
           />
         </div>
       </div>
+
+      {showModal && (
+        <Modal onClose={() => setShowModal(false)}>
+          <h2 className="text-xl font-bold mb-4">Upload Successful!</h2>
+          <p>
+            You will be notified when the processing is complete. You can also
+            check the status in the dashboard.
+          </p>
+          <Button onClick={() => router.push("/")}>Go to Home</Button>
+        </Modal>
+      )}
     </div>
   );
 }
@@ -210,6 +225,25 @@ function Switch({
           enabled ? "translate-x-6" : "translate-x-0"
         }`}
       />
+    </div>
+  );
+}
+
+function Modal({
+  children,
+  onClose,
+}: {
+  children: React.ReactNode;
+  onClose: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="bg-white p-6 rounded-lg shadow-lg">
+        {children}
+        <button className="mt-4 text-red-500" onClick={onClose}>
+          Close
+        </button>
+      </div>
     </div>
   );
 }

@@ -15,4 +15,33 @@ export class ProjectService {
         }
 
     }
+    static async getProjectsByUserId({ userId }: { userId: string }): Promise<{
+        userId: string;
+        title: string;
+        description: string | null;
+        id: string;
+        status: string;
+    }[]> {
+        try {
+            const projects = await prismaClient.project.findMany({
+                where: {
+                    userId
+                }
+            })
+            return projects;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    static async updateProjectStatus(projectId: string, status: string) {
+        try {
+            await prismaClient.project.update({
+                where: { id: projectId },
+                data: { status: status },
+            })
+        } catch (error) {
+            throw error;
+        }
+    }
 }
