@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useParams } from "next/navigation";
-import { uploadVideo } from "./actions";
+import { useParams, useRouter } from "next/navigation";
+import { uploadVideo, initiateBackground } from "./actions";
 
 export default function VideoUploadPage() {
   const [videoFiles, setVideoFiles] = useState<File[]>([]);
@@ -12,7 +12,9 @@ export default function VideoUploadPage() {
   const [includeSubtitles, setIncludeSubtitles] = useState(false);
   const [generateTranscript, setGenerateTranscript] = useState(false);
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
+  const [showModal, setShowModal] = useState(false);
   const params = useParams();
+  const router = useRouter();
   const projectId = params.projectId;
   const userId = params.userId;
 
@@ -51,11 +53,40 @@ export default function VideoUploadPage() {
       });
       const formData = new FormData();
       formData.append("file", renamedFile);
-
       await uploadVideo(formData, { userId, projectId });
     }
+
+    const projectMetaData = {
+      generate_translate: translate,
+      generate_subtitle: includeSubtitles,
+      languages: selectedLanguages,
+      generate_transcript: generateTranscript,
+    };
+
+    if (
+      !projectId ||
+      !userId ||
+      Array.isArray(projectId) ||
+      Array.isArray(userId)
+    ) {
+      return;
+    }
+
+    const result = await initiateBackground({
+      userId,
+      projectId,
+      projectMetaData,
+    });
+
+    if (!result) {
+      alert("Failed to initiate background process");
+      return;
+    }
+
     setUploading(false);
-    alert("Videos uploaded successfully!");
+    alert(
+      "Videos uploaded successfully! , You will be notified when the processing is complete. or you can check the status in the dashboard"
+    );
   };
 
   const handleLanguageChange = (language: string) => {
@@ -85,15 +116,26 @@ export default function VideoUploadPage() {
           onChange={handleFileChange}
           className="mt-4 mb-4"
         />
-
-        <div className="grid grid-cols-3 gap-3 w-full">
+        <div className="flex flex-col gap-4">
           {previewUrls.map((url, index) => (
-            <video
+            <div
               key={index}
-              src={url}
-              controls
-              className="w-32 h-32 rounded-lg shadow-md"
-            />
+              className="flex items-center gap-4 bg-gray-100 p-4 rounded-lg shadow-md"
+            >
+              <video
+                src={url}
+                controls
+                className="w-48 h-48 rounded-lg shadow-lg"
+                onLoadedMetadata={(e) => e.currentTarget.pause()}
+                preload="metadata"
+              />
+              <div className="text-black flex flex-col font-semibold">
+                Video file name: {videoFiles[index].name}
+                <br />
+                playlist order: {index + 1}
+                <br />
+              </div>
+            </div>
           ))}
         </div>
       </div>
@@ -148,6 +190,17 @@ export default function VideoUploadPage() {
           />
         </div>
       </div>
+
+      {showModal && (
+        <Modal onClose={() => setShowModal(false)}>
+          <h2 className="text-xl font-bold mb-4">Upload Successful!</h2>
+          <p>
+            You will be notified when the processing is complete. You can also
+            check the status in the dashboard.
+          </p>
+          <Button onClick={() => router.push("/")}>Go to Home</Button>
+        </Modal>
+      )}
     </div>
   );
 }
@@ -163,7 +216,7 @@ function Switch({
   return (
     <div
       className={`relative w-12 h-6 flex items-center bg-gray-300 rounded-full p-1 cursor-pointer transition ${
-        enabled ? "bg-green-600" : "bg-gray-300"
+        enabled ? "bg-red-500" : "bg-gray-300"
       }`}
       onClick={() => onChange(!enabled)}
     >
@@ -172,6 +225,25 @@ function Switch({
           enabled ? "translate-x-6" : "translate-x-0"
         }`}
       />
+    </div>
+  );
+}
+
+function Modal({
+  children,
+  onClose,
+}: {
+  children: React.ReactNode;
+  onClose: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="bg-white p-6 rounded-lg shadow-lg">
+        {children}
+        <button className="mt-4 text-red-500" onClick={onClose}>
+          Close
+        </button>
+      </div>
     </div>
   );
 }
@@ -194,7 +266,7 @@ function Button({
         transition ${
           disabled
             ? "bg-gray-400 cursor-not-allowed"
-            : "bg-green-600 hover:bg-green-700"
+            : "bg-red-500 hover:bg-red-700"
         }`}
     >
       {children}

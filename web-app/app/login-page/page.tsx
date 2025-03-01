@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import { userLogin } from "./action";
 import { useRouter } from "next/navigation";
 
-function App() {
+export default function Login() {
   return (
     <div className="app">
       <LoginPage />
@@ -22,7 +22,7 @@ interface FormErrors {
   password: string;
 }
 
-export function LoginPage() {
+function LoginPage() {
   const [formData, setFormData] = useState<FormState>({
     email: "",
     password: "",
@@ -172,5 +172,3 @@ export function LoginPage() {
     </div>
   );
 }
-
-export default App;

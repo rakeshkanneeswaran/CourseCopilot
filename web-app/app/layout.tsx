@@ -27,6 +27,31 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <nav className="bg-gradient-to-r from-violet-500 to-red-500 p-4 shadow-lg">
+          <div className="container mx-auto flex justify-between items-center">
+            {/* Logo */}
+            <h1 className="text-white text-2xl font-bold">My App</h1>
+
+            {/* Navigation Links */}
+            <ul className="flex space-x-6">
+              <li>
+                <a href="#" className="text-white text-lg hover:underline">
+                  Home
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-white text-lg hover:underline">
+                  About
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-white text-lg hover:underline">
+                  Contact
+                </a>
+              </li>
+            </ul>
+          </div>
+        </nav>
         {children}
       </body>
     </html>

@@ -30,6 +30,7 @@ model Project {
   userId      String
   user        User    @relation(fields: [userId], references: [id])
   videos      Video[]
+  status      String  @default("NOT_STARTED")
 }
 
 model Video {
