@@ -33,6 +33,10 @@ model Project {
   status      String  @default("NOT_STARTED")
 }
 
+model ProjectMetaData {
+  id String @id @default(uuid())
+}
+
 model Video {
   id            String         @id @default(uuid())
   position      Int?
@@ -45,7 +49,7 @@ model VideoMetadata {
   id         String @id @default(uuid())
   keyName    String
   bucketName String
-  language   String
   videoId    String @unique
+  fileName   String
   video      Video  @relation(fields: [videoId], references: [id])
 }

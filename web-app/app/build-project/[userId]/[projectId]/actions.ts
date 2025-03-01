@@ -1,6 +1,7 @@
 "use server"
 
 import { BackgroundService } from "@/data-core/services/background-service";
+import { VideoService } from "@/data-core/services/video-service";
 
 interface ProjectMetaData {
     generate_translate: boolean;
@@ -9,15 +10,13 @@ interface ProjectMetaData {
     generate_transcript: boolean;
 }
 
-import { VideoService } from "@/data-core/services/video-service";
-export async function uploadVideo(formData: FormData, userData: { userId: string, projectId: string }) {
+export async function uploadVideo(formData: FormData, userData: { userId: string, projectId: string }, position: number) {
     try {
-        const result = await VideoService.uploadVideo(formData, userData)
+        const result = await VideoService.uploadVideo(formData, userData, position)
         return result.success;
     } catch (error) {
         console.error('Error uploading video:', error);
     }
-
 }
 
 export async function initiateBackground({ userId, projectId, projectMetaData }: { userId: string, projectId: string, projectMetaData: ProjectMetaData }) {

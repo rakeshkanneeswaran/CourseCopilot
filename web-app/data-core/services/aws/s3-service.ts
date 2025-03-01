@@ -1,11 +1,12 @@
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, ListObjectsV2Command, GetObjectCommand, DeleteObjectsCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import prismaClient from "@/data-core/database";
 
 const s3 = new S3Client({
     region: process.env.AWS_REGION!,
     credentials: {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-
     },
 });
 
@@ -23,19 +24,103 @@ export class S3Service {
             }
             const buffer = Buffer.from(await file.arrayBuffer());
             const uploadedFile = formData.get("file") as File;
-            const key = uploadedFile.name;
+            const fileName = uploadedFile.name;
+            const filePath = `${userData.userId}/${userData.projectId}/original_content/videos/${fileName}`;
             const putObjectCommand = new PutObjectCommand({
                 Bucket: bucket,
-                Key: `${userData.userId}/${userData.projectId}/${key}`,
+                Key: filePath,
                 Body: buffer,
                 ContentType: file.type,
             });
-
-            const result = await s3.send(putObjectCommand);
-            return { success: true, data: result };
+            await s3.send(putObjectCommand);
+            return {
+                success: true, data: {
+                    fileName,
+                    filePath,
+                    bucket,
+                    userId: userData.userId,
+                    projectId: userData.projectId,
+                }
+            };
         } catch (error) {
             console.error("S3 Upload Error:", error, { bucket });
-            return { success: false, error: `Error while uploading file to S3 bucket. Details: bucket=${bucket}` };
+            throw error
+        }
+    }
+
+    static async getProjectFileUrl({ userData }: {
+        userData: {
+            userId: string,
+            projectId: string
+        }
+    }) {
+        try {
+            const videoMetaData = await prismaClient.video.findMany({
+                where: {
+                    projectId: userData.projectId,
+                    project: {
+                        userId: userData.userId
+                    }
+                },
+                select: {
+                    videoMetaData: true
+                }
+                ,
+                orderBy: {
+                    position: 'asc'
+                }
+            })
+            const preSignedFilesUrls = await Promise.all(
+                videoMetaData.map(async (eachVideoMetaData) => {
+                    const getS3objectCommand = new GetObjectCommand({
+                        Bucket: eachVideoMetaData.videoMetaData?.bucketName,
+                        Key: eachVideoMetaData.videoMetaData?.keyName,
+                    });
+                    const url = await getSignedUrl(s3, getS3objectCommand, { expiresIn: 900 });
+                    return {
+                        name: eachVideoMetaData.videoMetaData!.fileName,
+                        url,
+                    };
+                })
+            );
+
+            return preSignedFilesUrls;
+        } catch (error) {
+            console.error("S3 GetProjectFiles Error:", error, { userData });
+            throw new Error('Failed to fetch project files from S3');
+        }
+    }
+
+    static async deleteProjectFiles({ userData }: {
+        userData: {
+            userId: string,
+            projectId: string
+        }
+    }) {
+        try {
+            const bucket = process.env.VIDEO_BUCKET_NAME!;
+            const listCommand = new ListObjectsV2Command({
+                Bucket: bucket,
+                Prefix: `${userData.userId}/${userData.projectId}/`,
+            });
+
+            const listResponse = await s3.send(listCommand);
+            const objects = listResponse.Contents;
+
+            if (!objects || objects.length === 0) {
+                console.log("No objects found in the folder.");
+                return;
+            }
+            const deleteCommand = new DeleteObjectsCommand({
+                Bucket: bucket,
+                Delete: {
+                    Objects: objects.map(obj => ({ Key: obj.Key })),
+                },
+            });
+            await s3.send(deleteCommand);
+        } catch (error) {
+            console.error("S3 DeleteProjectFiles Error:", error, { userData });
+            throw new Error('Failed to delete project files from S3');
         }
     }
 }

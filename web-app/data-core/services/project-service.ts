@@ -1,4 +1,5 @@
 import prismaClient from "@/data-core/database";
+import { S3Service } from "./aws/s3-service";
 export class ProjectService {
     static async createProject({ userId, title, description }: { userId: string, title: string, description: string }): Promise<string> {
         try {
@@ -13,7 +14,6 @@ export class ProjectService {
         } catch (error) {
             throw error;
         }
-
     }
     static async getProjectsByUserId({ userId }: { userId: string }): Promise<{
         userId: string;
@@ -44,4 +44,63 @@ export class ProjectService {
             throw error;
         }
     }
+
+    static async getProjectDetailsFromS3({ userId, projectId }: { userId: string, projectId: string }) {
+        try {
+            const userData = {
+                userId,
+                projectId
+            }
+            const videoUrls = await S3Service.getProjectFileUrl({ userData });
+            return videoUrls;
+        } catch (error) {
+
+            console.error('Error fetching project details from S3:', error);
+            throw new Error(`Unable to fetch project details from S3 for user data userId ; ${userId}  projectId ${projectId} `);
+        }
+    }
+
+    static async deleteProject({ userId, projectId }: { userId: string, projectId: string }) {
+        try {
+            await prismaClient.$transaction(async (tx) => {
+                // Check if the project exists
+                const projectExist = await tx.project.findUnique({
+                    where: { userId, id: projectId }
+                });
+                if (!projectExist) {
+                    throw new Error(`Project not found for userId: ${userId}, projectId: ${projectId}`);
+                }
+
+                // Delete VideoMetadata first (depends on Video)
+                await tx.videoMetadata.deleteMany({
+                    where: {
+                        videoId: {
+                            in: (await tx.video.findMany({
+                                where: { projectId },
+                                select: { id: true }
+                            })).map(v => v.id)
+                        }
+                    }
+                });
+
+                // Delete Videos (depends on Project)
+                await tx.video.deleteMany({
+                    where: { projectId }
+                });
+
+                // Delete Project last
+                await tx.project.delete({
+                    where: { id: projectId }
+                });
+            });
+
+            // Delete project files from S3 (outside transaction)
+            await S3Service.deleteProjectFiles({ userData: { userId, projectId } });
+
+        } catch (error) {
+            console.error("Error deleting project:", error);
+            throw new Error(`Unable to delete project for userId: ${userId}, projectId: ${projectId}`);
+        }
+    }
+
 }

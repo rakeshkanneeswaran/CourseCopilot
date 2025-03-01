@@ -47,13 +47,13 @@ export default function VideoUploadPage() {
         return;
       }
       position = position + 1;
-      const newFileName = `${projectId}_${position}_.mp4`;
+      const newFileName = `${projectId}_${position}.mp4`;
       const renamedFile = new File([videoFile], newFileName, {
         type: videoFile.type,
       });
       const formData = new FormData();
       formData.append("file", renamedFile);
-      await uploadVideo(formData, { userId, projectId });
+      await uploadVideo(formData, { userId, projectId }, position);
     }
 
     const projectMetaData = {

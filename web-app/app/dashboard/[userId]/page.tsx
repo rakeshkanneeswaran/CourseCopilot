@@ -1,5 +1,4 @@
 "use client";
-
 interface Project {
   userId: string;
   title: string;
@@ -50,6 +49,7 @@ const DashboardPage = () => {
           <div
             key={project.id}
             className="bg-white p-6 rounded-2xl shadow-md border border-gray-200 hover:shadow-lg transition flex justify-between items-start"
+            onClick={() => router.push(`/view-project/${userId}/${project.id}`)}
           >
             {/* Left Section: Title, Description, Project ID */}
             <div className="flex-1">
