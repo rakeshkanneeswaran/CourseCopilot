@@ -33,6 +33,7 @@ model Project {
   status            String           @default("NOT_STARTED")
   projectMetaDataId String?
   projectMetaData   ProjectMetaData?
+  createdAt         DateTime         @default(now())
 }
 
 model ProjectMetaData {

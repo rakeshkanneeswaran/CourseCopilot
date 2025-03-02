@@ -72,7 +72,7 @@ export default function Page() {
   };
 
   return (
-    <div className="min-h-screen bg-green-100 flex flex-col items-center p-6">
+    <div className="min-h-screen bg-orange-50 flex flex-col items-center p-6">
       {/* Delete Button */}
       <button
         onClick={() => setIsConfirmModalOpen(true)}
@@ -86,11 +86,8 @@ export default function Page() {
         {projectDetailsUrl.map((eachFile) => (
           <div
             key={eachFile.name}
-            className="bg-white p-4 rounded-lg shadow-lg"
+            className="bg-black p-4 rounded-lg shadow-lg"
           >
-            <p className="text-lg font-semibold text-black mb-2">
-              {eachFile.name}
-            </p>
             <div className="relative">
               <video
                 id={eachFile.name}
@@ -108,6 +105,9 @@ export default function Page() {
                 )}
               </button>
             </div>
+            <p className="text-lg font-semibold text-white mb-2">
+              {eachFile.name}
+            </p>
           </div>
         ))}
       </div>

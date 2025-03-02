@@ -18,7 +18,7 @@ export class ProjectService {
     static async getProjectsByUserId({ userId }: { userId: string }): Promise<{
         userId: string;
         title: string;
-        description: string | null;
+        createdAt: Date
         id: string;
         status: string;
     }[]> {
@@ -26,8 +26,16 @@ export class ProjectService {
             const projects = await prismaClient.project.findMany({
                 where: {
                     userId
+                },
+                select: {
+                    userId: true,
+                    title: true,
+                    createdAt: true,
+                    id: true,
+                    status: true
                 }
             })
+            console.log("Projects:", projects);
             return projects;
         } catch (error) {
             throw error;
