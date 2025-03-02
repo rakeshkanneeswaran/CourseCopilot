@@ -1,5 +1,5 @@
 
-export interface ProcessVideoRequest {
+export interface ProcessProjectRequest {
     userId: string;
     projectId: string;
     projectMetaData: {
