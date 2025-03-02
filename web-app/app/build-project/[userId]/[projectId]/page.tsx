@@ -9,6 +9,7 @@ export default function VideoUploadPage() {
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [translate, setTranslate] = useState(false);
+  const [gender, setGender] = useState<string>("male"); // Default to male
   const [includeSubtitles, setIncludeSubtitles] = useState(false);
   const [generateTranscript, setGenerateTranscript] = useState(false);
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
@@ -61,6 +62,7 @@ export default function VideoUploadPage() {
       generate_subtitle: includeSubtitles,
       languages: selectedLanguages,
       generate_transcript: generateTranscript,
+      gender,
     };
 
     if (
@@ -87,6 +89,7 @@ export default function VideoUploadPage() {
     alert(
       "Videos uploaded successfully! , You will be notified when the processing is complete. or you can check the status in the dashboard"
     );
+    router.push(`/dashboard/${userId}`);
   };
 
   const handleLanguageChange = (language: string) => {
@@ -145,6 +148,12 @@ export default function VideoUploadPage() {
         <h2 className="text-xl font-bold text-gray-800 mb-4">
           Processing Options
         </h2>
+
+        {/* Gender Selection */}
+        <div className="flex items-center justify-between w-full mb-4">
+          <span className="text-gray-700">Select Gender</span>
+          <GenderToggle gender={gender} onChange={setGender} />
+        </div>
 
         {/* Translation Toggle */}
         <div className="flex items-center justify-between w-full mb-4">
@@ -205,7 +214,30 @@ export default function VideoUploadPage() {
   );
 }
 
-/* ✅ Custom Switch Component */
+function GenderToggle({
+  gender,
+  onChange,
+}: {
+  gender: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div
+      className={`relative w-20 h-5 flex items-center rounded-full p-1 cursor-pointer transition ${
+        gender === "male" ? "bg-blue-500" : "bg-pink-500"
+      }`}
+      onClick={() => onChange(gender === "male" ? "female" : "male")}
+    >
+      <div
+        className={`w-5 h-5 bg-white rounded-full shadow-md transition-transform ${
+          gender === "male" ? "translate-x-0" : "translate-x-14"
+        }`}
+      />
+      <span className="absolute left-2 text-white font-semibold">M</span>
+      <span className="absolute right-2 text-white font-semibold">F</span>
+    </div>
+  );
+}
 function Switch({
   enabled,
   onChange,
@@ -229,6 +261,7 @@ function Switch({
   );
 }
 
+/* ✅ Custom Modal Component */
 function Modal({
   children,
   onClose,
@@ -262,12 +295,11 @@ function Button({
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`px-4 py-2 font-semibold text-white rounded-lg shadow-md 
-        transition ${
-          disabled
-            ? "bg-gray-400 cursor-not-allowed"
-            : "bg-red-500 hover:bg-red-700"
-        }`}
+      className={`px-4 py-2 font-semibold text-white rounded-lg shadow-md transition ${
+        disabled
+          ? "bg-gray-400 cursor-not-allowed"
+          : "bg-red-500 hover:bg-red-700"
+      }`}
     >
       {children}
     </button>
