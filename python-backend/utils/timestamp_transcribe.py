@@ -10,9 +10,22 @@ from pydub import AudioSegment
 from google.cloud import texttospeech
 from format_transcriptions import format_transcriptions
 import model_utils
+import whisper_timestamped as whisper
 
-model = model_utils.get_model()
+model = whisper.load_model("base")
 from format_transcriptions import format_transcriptions  # Assuming format_transcription is in this file
+def format_transcriptions(transcriptions):
+    formatted = []
+    for transcription in transcriptions:
+        formatted_entry = {
+            "id": transcription["id"],
+            "start_time": f"{transcription['start']:.2f}s",
+            "end_time": f"{transcription['end']:.2f}s",
+            "text": transcription["text"],
+            "confidence": transcription.get("confidence", "N/A"),
+        }
+        formatted.append(formatted_entry)
+    return formatted
 
 def transcribe_video_with_timestamps(video_path, model):
     try:

@@ -4,7 +4,7 @@ import { S3Service } from "./aws/s3-service";
 export class VideoService {
     static async uploadVideo(formData: FormData, userData: { userId: string, projectId: string }, position: number) {
         try {
-            const uploadVideoResult = await S3Service.uploadVideoFile({ bucket: "eduverseai-production", formData, userData })
+            const uploadVideoResult = await S3Service.uploadVideoFile({ bucket: "course-co-pilot-dev", formData, userData })
 
             const result = await prismaClient.$transaction(async (tx) => {
                 const video = await tx.video.create({
