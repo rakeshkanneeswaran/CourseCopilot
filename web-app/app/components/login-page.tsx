@@ -80,16 +80,15 @@ export default function LoginPage() {
       setTimeout(() => {
         console.log("Login submitted:", formData);
         setIsSubmitting(false);
-        // Here you would typically handle the authentication logic
       }, 1500);
     }
   };
 
   return (
     <div className="flex justify-center items-center min-h-screen p-5 bg-black">
-      <div className="w-full max-w-md p-8 rounded-lg border border-green-500 bg-black shadow-lg">
+      <div className="w-full max-w-md p-8 rounded-lg border border-opacity-50 bg-black shadow-lg">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-green-500 mb-2">
+          <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-500 mb-2">
             Welcome Back
           </h1>
           <p className="text-white opacity-80">Please sign in to continue</p>
@@ -114,7 +113,7 @@ export default function LoginPage() {
                 errors.email
                   ? "border-red-500"
                   : "border-white border-opacity-10"
-              } text-white focus:outline-none focus:border-green-500 transition duration-300`}
+              } text-white focus:outline-none focus:border-purple-400 transition duration-300`}
             />
             {errors.email && (
               <span className="text-red-500 text-sm mt-1 block">
@@ -141,7 +140,7 @@ export default function LoginPage() {
                 errors.password
                   ? "border-red-500"
                   : "border-white border-opacity-10"
-              } text-white focus:outline-none focus:border-green-500 transition duration-300`}
+              } text-white focus:outline-none focus:border-pink-500 transition duration-300`}
             />
             {errors.password && (
               <span className="text-red-500 text-sm mt-1 block">
@@ -153,7 +152,7 @@ export default function LoginPage() {
           <div className="text-right mb-5">
             <a
               href="#"
-              className="text-green-500 text-sm hover:opacity-80 transition duration-300"
+              className="text-purple-400 text-sm hover:opacity-80 transition duration-300"
             >
               Forgot password?
             </a>
@@ -161,10 +160,10 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className={`py-3 px-4 rounded-md font-semibold text-white transition duration-300 ${
+            className={`py-3 px-4 rounded-md font-semibold text-white transition duration-300 bg-gradient-to-r from-purple-400 to-pink-500 ${
               isSubmitting
-                ? "bg-green-500 bg-opacity-60 cursor-not-allowed"
-                : "bg-green-500 hover:bg-green-600"
+                ? "bg-opacity-60 cursor-not-allowed"
+                : "hover:opacity-90"
             }`}
             disabled={isSubmitting}
           >
@@ -175,7 +174,7 @@ export default function LoginPage() {
             Do not have an account?{" "}
             <a
               href="#"
-              className="text-green-500 font-semibold hover:opacity-80 transition duration-300"
+              className="text-purple-400 font-semibold hover:opacity-80 transition duration-300"
             >
               Sign up
             </a>

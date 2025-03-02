@@ -1,16 +1,8 @@
 "use client";
-import type React from "react";
-import { useState, type FormEvent } from "react";
+
+import React, { useState, type FormEvent, type ChangeEvent } from "react";
 import { userLogin } from "./action";
 import { useRouter } from "next/navigation";
-
-export default function Login() {
-  return (
-    <div className="app">
-      <LoginPage />
-    </div>
-  );
-}
 
 interface FormState {
   email: string;
@@ -18,75 +10,62 @@ interface FormState {
 }
 
 interface FormErrors {
-  email: string;
-  password: string;
+  email?: string;
+  password?: string;
 }
 
-function LoginPage() {
+export default function LoginPage() {
   const [formData, setFormData] = useState<FormState>({
     email: "",
     password: "",
   });
 
-  const [errors, setErrors] = useState<FormErrors>({
-    email: "",
-    password: "",
-  });
-
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData((prev) => ({ ...prev, [name]: value }));
 
     // Clear error when user types
-    if (errors[name as keyof FormErrors]) {
-      setErrors({
-        ...errors,
-        [name]: "",
-      });
-    }
+    setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
     try {
       const result = await userLogin({
         username: formData.email,
         password: formData.password,
       });
       if (result.status) {
-        localStorage.setItem("userId", result.userId);
         router.push(`/dashboard/${result.userId}`);
-        return true;
       }
-      setIsSubmitting(false);
-      return false;
     } catch (error) {
-      console.error("Error logging in:", error);
-      throw Error("Error logging");
+      console.error("Login failed", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen p-5 bg-black">
-      <div className="w-full max-w-md p-8 rounded-lg border border-green-500 bg-black shadow-lg">
+    <div className="flex justify-center items-center min-h-screen p-5 bg-white">
+      <div className="w-full max-w-md p-8 rounded-lg border border-black bg-white shadow-lg">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-green-500 mb-2">
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-violet-500 via-pink-500 to-red-500 text-transparent bg-clip-text mb-2">
             Welcome Back
           </h1>
-          <p className="text-white opacity-80">Please sign in to continue</p>
+          <p className="text-gray-700">Please sign in to continue</p>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col">
           <div className="mb-5">
             <label
               htmlFor="email"
-              className="block mb-2 font-medium text-white"
+              className="block mb-2 font-medium text-gray-700"
             >
               Email
             </label>
@@ -97,11 +76,9 @@ function LoginPage() {
               value={formData.email}
               onChange={handleChange}
               placeholder="Enter your email"
-              className={`w-full px-4 py-3 rounded-md bg-opacity-5 bg-white border-2 ${
-                errors.email
-                  ? "border-red-500"
-                  : "border-white border-opacity-10"
-              } text-white focus:outline-none focus:border-green-500 transition duration-300`}
+              className={`w-full px-4 py-3 rounded-md border-2 text-black ${
+                errors.email ? "border-red-500" : "border-gray-300"
+              } focus:outline-none focus:border-violet-500 transition duration-300`}
             />
             {errors.email && (
               <span className="text-red-500 text-sm mt-1 block">
@@ -113,7 +90,7 @@ function LoginPage() {
           <div className="mb-5">
             <label
               htmlFor="password"
-              className="block mb-2 font-medium text-white"
+              className="block mb-2 font-medium text-gray-700"
             >
               Password
             </label>
@@ -124,11 +101,9 @@ function LoginPage() {
               value={formData.password}
               onChange={handleChange}
               placeholder="Enter your password"
-              className={`w-full px-4 py-3 rounded-md bg-opacity-5 bg-white border-2 ${
-                errors.password
-                  ? "border-red-500"
-                  : "border-white border-opacity-10"
-              } text-white focus:outline-none focus:border-green-500 transition duration-300`}
+              className={`w-full px-4 py-3 rounded-md border-2 text-black ${
+                errors.password ? "border-red-500" : "border-gray-300"
+              } focus:outline-none focus:border-violet-500 transition duration-300`}
             />
             {errors.password && (
               <span className="text-red-500 text-sm mt-1 block">
@@ -140,7 +115,7 @@ function LoginPage() {
           <div className="text-right mb-5">
             <a
               href="#"
-              className="text-green-500 text-sm hover:opacity-80 transition duration-300"
+              className="text-violet-500 text-sm hover:opacity-80 transition duration-300"
             >
               Forgot password?
             </a>
@@ -148,21 +123,19 @@ function LoginPage() {
 
           <button
             type="submit"
-            className={`py-3 px-4 rounded-md font-semibold text-white transition duration-300 ${
-              isSubmitting
-                ? "bg-green-500 bg-opacity-60 cursor-not-allowed"
-                : "bg-green-500 hover:bg-green-600"
+            className={`py-3 px-4 rounded-md font-semibold text-white transition duration-300 bg-gradient-to-r from-violet-500 via-pink-500 to-red-500 hover:opacity-90 ${
+              isSubmitting ? "opacity-60 cursor-not-allowed" : ""
             }`}
             disabled={isSubmitting}
           >
             {isSubmitting ? "Signing in..." : "Sign In"}
           </button>
 
-          <div className="mt-6 text-center text-sm text-white">
+          <div className="mt-6 text-center text-sm text-gray-700">
             Do not have an account?{" "}
             <a
               href="#"
-              className="text-green-500 font-semibold hover:opacity-80 transition duration-300"
+              className="text-violet-500 font-semibold hover:opacity-80 transition duration-300"
             >
               Sign up
             </a>

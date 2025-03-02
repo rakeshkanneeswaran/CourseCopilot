@@ -25,6 +25,7 @@ export const AcmeLogo = () => {
 export default function App() {
   return (
     <Navbar
+      className="bg-gradient-to-r from-violet-500 via-pink-500 via-blue-500 to-red-500 text-white"
       classNames={{
         item: [
           "flex",
@@ -38,7 +39,7 @@ export default function App() {
           "data-[active=true]:after:right-0",
           "data-[active=true]:after:h-[2px]",
           "data-[active=true]:after:rounded-[2px]",
-          "data-[active=true]:after:bg-primary",
+          "data-[active=true]:after:bg-white",
         ],
       }}
     >
@@ -48,27 +49,38 @@ export default function App() {
       </NavbarBrand>
       <NavbarContent className="hidden sm:flex gap-4" justify="center">
         <NavbarItem>
-          <Link color="foreground" href="#">
+          <Link color="foreground" href="#" className="text-white">
             Features
           </Link>
         </NavbarItem>
         <NavbarItem isActive>
-          <Link aria-current="page" href="#">
+          <Link
+            aria-current="page"
+            href="#"
+            className="text-white font-semibold"
+          >
             Customers
           </Link>
         </NavbarItem>
         <NavbarItem>
-          <Link color="foreground" href="#">
+          <Link color="foreground" href="#" className="text-white">
             Integrations
           </Link>
         </NavbarItem>
       </NavbarContent>
       <NavbarContent justify="end">
         <NavbarItem className="hidden lg:flex">
-          <Link href="#">Login</Link>
+          <Link href="#" className="text-white">
+            Login
+          </Link>
         </NavbarItem>
         <NavbarItem>
-          <Button as={Link} color="primary" href="#" variant="flat">
+          <Button
+            as={Link}
+            href="#"
+            variant="flat"
+            className="bg-white text-red-500"
+          >
             Sign Up
           </Button>
         </NavbarItem>

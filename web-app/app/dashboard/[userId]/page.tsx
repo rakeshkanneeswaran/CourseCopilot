@@ -38,12 +38,12 @@ const DashboardPage = () => {
   }, [userId]);
 
   return (
-    <div className="min-h-screen bg-orange-50 text-black p-6 flex flex-col gap-6">
+    <div className="min-h-screen bg-white text-black p-6 flex flex-col gap-6">
       {/* Header Section */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Welcome, User {userId}</h1>
         <button
-          className="bg-black text-white px-4 py-2 rounded-lg shadow-md hover:bg-slate-700"
+          className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-slate-700"
           onClick={() => router.push(`/createProject/${userId}`)}
         >
           Create New Project

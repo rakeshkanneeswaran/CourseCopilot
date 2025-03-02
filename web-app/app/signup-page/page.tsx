@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { userSignup } from "./action";
 import { useRouter } from "next/navigation";
+
 interface SignupData {
   username: string;
   password: string;
@@ -31,7 +32,6 @@ export default function SignupPage() {
     setSuccess("");
     try {
       const result = await userSignup(formData);
-
       setSuccess("Signup successful!");
       router.push(`/dashboard/${result.userId}`);
     } catch (err) {
@@ -42,47 +42,77 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-black text-white">
-      <div className="w-full max-w-md p-6 bg-gray-900 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold text-center mb-4">Sign Up</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            name="name"
-            placeholder="Name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            className="w-full p-2 bg-gray-800 border border-gray-700 rounded text-white"
-          />
-          <input
-            type="text"
-            name="username"
-            placeholder="Username"
-            value={formData.username}
-            onChange={handleChange}
-            required
-            className="w-full p-2 bg-gray-800 border border-gray-700 rounded text-white"
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            className="w-full p-2 bg-gray-800 border border-gray-700 rounded text-white"
-          />
+    <div className="flex justify-center items-center min-h-screen p-5 bg-white">
+      <div className="w-full max-w-md p-8 rounded-lg border border-black bg-white shadow-lg">
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-violet-500 via-pink-500 to-red-500 text-transparent bg-clip-text mb-2">
+            Create Your Account
+          </h1>
+          <p className="text-gray-700">Join us today!</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="flex flex-col">
+          <div className="mb-5">
+            <label className="block mb-2 font-medium text-gray-700">Name</label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="Enter your name"
+              className="w-full px-4 py-3 rounded-md border-2 text-black border-gray-300 focus:outline-none focus:border-violet-500 transition duration-300"
+            />
+          </div>
+
+          <div className="mb-5">
+            <label className="block mb-2 font-medium text-gray-700">
+              Email
+            </label>
+            <input
+              type="email"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              placeholder="Enter your email"
+              className="w-full px-4 py-3 rounded-md border-2 text-black border-gray-300 focus:outline-none focus:border-violet-500 transition duration-300"
+            />
+          </div>
+
+          <div className="mb-5">
+            <label className="block mb-2 font-medium text-gray-700">
+              Password
+            </label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Enter your password"
+              className="w-full px-4 py-3 rounded-md border-2 text-black border-gray-300 focus:outline-none focus:border-violet-500 transition duration-300"
+            />
+          </div>
+
           <button
             type="submit"
             disabled={loading}
-            className="w-full p-2 bg-white text-black font-semibold rounded hover:bg-gray-300"
+            className="py-3 px-4 rounded-md font-semibold text-white transition duration-300 bg-gradient-to-r from-violet-500 via-pink-500 to-red-500 hover:opacity-90"
           >
             {loading ? "Signing Up..." : "Sign Up"}
           </button>
+
+          {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+          {success && <p className="text-green-500 text-sm mt-2">{success}</p>}
+
+          <div className="mt-6 text-center text-sm text-gray-700">
+            Already have an account?{" "}
+            <a
+              href="#"
+              className="text-violet-500 font-semibold hover:opacity-80 transition duration-300"
+            >
+              Sign in
+            </a>
+          </div>
         </form>
-        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-        {success && <p className="text-green-500 text-sm mt-2">{success}</p>}
       </div>
     </div>
   );
