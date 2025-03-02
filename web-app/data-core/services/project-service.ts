@@ -88,6 +88,11 @@ export class ProjectService {
                     where: { projectId }
                 });
 
+
+                await tx.projectMetaData.delete({
+                    where: { projectId }
+                })
+
                 // Delete Project last
                 await tx.project.delete({
                     where: { id: projectId }
@@ -101,6 +106,28 @@ export class ProjectService {
             console.error("Error deleting project:", error);
             throw new Error(`Unable to delete project for userId: ${userId}, projectId: ${projectId}`);
         }
+    }
+
+
+    static async addProjectMetaData({ projectId, generate_translate, languages, generate_subtitle, generate_transcript, gender }: { projectId: string, generate_translate: boolean, languages: string[], generate_subtitle: boolean, generate_transcript: boolean, gender: string }) {
+        try {
+            const metaData = await prismaClient.projectMetaData.create({
+                data: {
+                    projectId: projectId,
+                    languages,
+                    generate_translate,
+                    generate_subtitle,
+                    generate_transcript,
+                    gender
+                }
+            })
+
+            return metaData;
+        } catch (error) {
+            console.error("Error updating project metadata:", error);
+            throw error;
+        }
+
     }
 
 }

@@ -5,6 +5,7 @@ interface ProjectMetaData {
     generate_subtitle: boolean;
     languages: string[];
     generate_transcript: boolean;
+    gender: string;
 }
 
 
@@ -14,6 +15,7 @@ export class BackgroundService {
         try {
             const result = await KafkaService.sendMessageToKafka(process.env.KAFKA_TOPIC!, JSON.stringify({ userId, projectId, projectMetaData }))
             await ProjectService.updateProjectStatus(projectId, 'IN_PROGRESS')
+            await ProjectService.addProjectMetaData({ projectId, ...projectMetaData })
             return result
         } catch (error) {
             console.error('Error sending message to kafka:', error);

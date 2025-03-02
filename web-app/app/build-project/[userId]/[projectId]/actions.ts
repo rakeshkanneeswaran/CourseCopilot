@@ -8,6 +8,7 @@ interface ProjectMetaData {
     generate_subtitle: boolean;
     languages: string[];
     generate_transcript: boolean;
+    gender: string;
 }
 
 export async function uploadVideo(formData: FormData, userData: { userId: string, projectId: string }, position: number) {
