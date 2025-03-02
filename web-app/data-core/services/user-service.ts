@@ -30,4 +30,50 @@ export class UserService {
         }
 
     }
+
+    static async createUser({ username, password, name }: { username: string, password: string, name: string }) {
+        try {
+            const result = await prismaClient.$transaction(async (tx) => {
+                const userExist = await tx.credentials.findMany({
+                    where: {
+                        username
+                    }
+                })
+
+                if (userExist.length > 0) {
+                    return {
+                        status: false,
+                        userId: ""
+                    }
+                }
+
+                const credentials = await tx.credentials.create({
+                    data: {
+                        username,
+                        password
+                    }
+                });
+
+                const user = await tx.user.create({
+                    data: {
+                        credentialId: credentials.id,
+                        name,
+                        email: username
+                    }
+                })
+
+                return {
+                    status: false,
+                    userId: user.id
+                }
+            })
+
+            return result
+
+
+        } catch (error) {
+            console.error('Error signing up:', error);
+            throw new Error('Failed to signup');
+        }
+    }
 }

@@ -101,115 +101,151 @@ export default function VideoUploadPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50 p-6 gap-6">
-      {/* Left Panel - Video Upload */}
-      <div className="w-1/2 flex flex-col items-center border-r border-gray-300 p-6">
-        <h1 className="text-2xl font-bold text-gray-800 mb-4">
-          Upload Your Videos
-        </h1>
+    <div>
+      <div className="flex min-h-screen bg-gray-50 p-6 gap-6">
+        {/* Left Panel - Video Upload */}
 
-        <Button onClick={handleUpload} disabled={uploading}>
-          {uploading ? "Uploading..." : "Upload Videos"}
-        </Button>
+        <div className="w-1/3 flex flex-col items-center border-r border-gray-300 p-6 ">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">
+            Upload Your Videos
+          </h1>
 
-        <input
-          type="file"
-          accept="video/*"
-          multiple
-          onChange={handleFileChange}
-          className="mt-4 mb-4"
-        />
-        <div className="flex flex-col gap-4">
-          {previewUrls.map((url, index) => (
-            <div
-              key={index}
-              className="flex items-center gap-4 bg-gray-100 p-4 rounded-lg shadow-md"
+          <div className="flex items-center justify-center w-full">
+            <label
+              htmlFor="dropzone-file"
+              className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-200 border-gray-600"
             >
-              <video
-                src={url}
-                controls
-                className="w-48 h-48 rounded-lg shadow-lg"
-                onLoadedMetadata={(e) => e.currentTarget.pause()}
-                preload="metadata"
-              />
-              <div className="text-black flex flex-col font-semibold">
-                Video file name: {videoFiles[index].name}
-                <br />
-                playlist order: {index + 1}
-                <br />
+              <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                <svg
+                  className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 20 16"
+                >
+                  <path
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                  />
+                </svg>
+                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                  <span className="font-semibold">Click to upload</span> or drag
+                  and drop
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Only Video Files Allowed (MP4, AVI, MOV, etc.)
+                </p>
               </div>
-            </div>
-          ))}
-        </div>
-      </div>
+              <input
+                id="dropzone-file" // <-- Added ID
+                type="file"
+                accept="video/*"
+                multiple
+                onChange={handleFileChange}
+                className="hidden"
+              />
+            </label>
+          </div>
 
-      {/* Right Panel - Processing Options */}
-      <div className="w-1/2 flex flex-col items-start p-6">
-        <h2 className="text-xl font-bold text-gray-800 mb-4">
-          Processing Options
-        </h2>
+          <Button onClick={handleUpload} disabled={uploading}>
+            {uploading ? "Uploading..." : "Upload Videos"}
+          </Button>
 
-        {/* Gender Selection */}
-        <div className="flex items-center justify-between w-full mb-4">
-          <span className="text-gray-700">Select Gender</span>
-          <GenderToggle gender={gender} onChange={setGender} />
-        </div>
-
-        {/* Translation Toggle */}
-        <div className="flex items-center justify-between w-full mb-4">
-          <span className="text-gray-700">Translate Video</span>
-          <Switch enabled={translate} onChange={setTranslate} />
-        </div>
-
-        {/* Language Selection */}
-        {translate && (
-          <div className="w-full">
-            <h3 className="text-lg font-semibold text-gray-700 mb-2">
-              Select Languages:
-            </h3>
-            {["English", "Spanish", "French", "German"].map((language) => (
-              <label
-                key={language}
-                className="flex items-center space-x-2 mb-2"
+          <div className="flex flex-col gap-4 overflow-y-scroll">
+            {previewUrls.map((url, index) => (
+              <div
+                key={index}
+                className="flex items-center gap-4 bg-gray-100 p-4 rounded-lg shadow-md"
               >
-                <input
-                  type="checkbox"
-                  checked={selectedLanguages.includes(language)}
-                  onChange={() => handleLanguageChange(language)}
-                  className="accent-green-600"
+                <video
+                  src={url}
+                  controls
+                  className="w-48 h-48 rounded-lg shadow-lg"
+                  onLoadedMetadata={(e) => e.currentTarget.pause()}
+                  preload="metadata"
                 />
-                <span className="text-gray-700">{language}</span>
-              </label>
+                <div className="text-black flex flex-col font-semibold">
+                  Video file name: {videoFiles[index].name}
+                  <br />
+                  playlist order: {index + 1}
+                  <br />
+                </div>
+              </div>
             ))}
           </div>
+        </div>
+
+        {/* Right Panel - Processing Options */}
+        <div className="w-2/3 flex flex-col items-start p-6">
+          <h2 className="text-xl font-bold text-gray-800 mb-4">
+            Processing Options
+          </h2>
+
+          {/* Gender Selection */}
+          <div className="flex items-center justify-between w-full mb-4">
+            <span className="text-gray-700">Select Gender</span>
+            <GenderToggle gender={gender} onChange={setGender} />
+          </div>
+
+          {/* Translation Toggle */}
+          <div className="flex items-center justify-between w-full mb-4">
+            <span className="text-gray-700">Translate Video</span>
+            <Switch enabled={translate} onChange={setTranslate} />
+          </div>
+
+          {/* Language Selection */}
+          {translate && (
+            <div className="w-full">
+              <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                Select Languages:
+              </h3>
+              {["English", "Spanish", "French", "German"].map((language) => (
+                <label
+                  key={language}
+                  className="flex items-center space-x-2 mb-2"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedLanguages.includes(language)}
+                    onChange={() => handleLanguageChange(language)}
+                    className="accent-green-600"
+                  />
+                  <span className="text-gray-700">{language}</span>
+                </label>
+              ))}
+            </div>
+          )}
+
+          {/* Subtitles Toggle */}
+          <div className="flex items-center justify-between w-full mt-6 mb-4">
+            <span className="text-gray-700">Include Subtitles</span>
+            <Switch enabled={includeSubtitles} onChange={setIncludeSubtitles} />
+          </div>
+
+          {/* Transcript Toggle */}
+          <div className="flex items-center justify-between w-full">
+            <span className="text-gray-700">Generate Transcript</span>
+            <Switch
+              enabled={generateTranscript}
+              onChange={setGenerateTranscript}
+            />
+          </div>
+        </div>
+
+        {showModal && (
+          <Modal onClose={() => setShowModal(false)}>
+            <h2 className="text-xl font-bold mb-4">Upload Successful!</h2>
+            <p>
+              You will be notified when the processing is complete. You can also
+              check the status in the dashboard.
+            </p>
+            <Button onClick={() => router.push("/")}>Go to Home</Button>
+          </Modal>
         )}
-
-        {/* Subtitles Toggle */}
-        <div className="flex items-center justify-between w-full mt-6 mb-4">
-          <span className="text-gray-700">Include Subtitles</span>
-          <Switch enabled={includeSubtitles} onChange={setIncludeSubtitles} />
-        </div>
-
-        {/* Transcript Toggle */}
-        <div className="flex items-center justify-between w-full">
-          <span className="text-gray-700">Generate Transcript</span>
-          <Switch
-            enabled={generateTranscript}
-            onChange={setGenerateTranscript}
-          />
-        </div>
       </div>
-
-      {showModal && (
-        <Modal onClose={() => setShowModal(false)}>
-          <h2 className="text-xl font-bold mb-4">Upload Successful!</h2>
-          <p>
-            You will be notified when the processing is complete. You can also
-            check the status in the dashboard.
-          </p>
-          <Button onClick={() => router.push("/")}>Go to Home</Button>
-        </Modal>
-      )}
     </div>
   );
 }
