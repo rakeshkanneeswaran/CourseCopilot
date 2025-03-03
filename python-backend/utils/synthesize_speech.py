@@ -9,19 +9,7 @@ import subprocess
 from pydub import AudioSegment
 from google.cloud import texttospeech
 
-# def synthesize_speech(text, output_filename, language_code, language_name, ssml_gender):
-#     # Create a Text-to-Speech client
-#     client = texttospeech.TextToSpeechClient()
 
-#     # Set the text input
-#     input_text = texttospeech.SynthesisInput(text=text)
-
-#     # Configure the voice settings
-#     voice = texttospeech.VoiceSelectionParams(
-#         language_code=language_code,
-#         name=language_name,
-#         ssml_gender=texttospeech.SsmlVoiceGender.MALE
-#     )
 
 def synthesize_speech(text, output_filename, language_code, language_name, ssml_gender):
     # Create a Text-to-Speech client

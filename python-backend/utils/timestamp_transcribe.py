@@ -8,8 +8,6 @@ import tqdm as tqdm
 import subprocess
 from pydub import AudioSegment
 from google.cloud import texttospeech
-from format_transcriptions import format_transcriptions
-import model_utils
 import whisper_timestamped as whisper
 
 model = whisper.load_model("base")

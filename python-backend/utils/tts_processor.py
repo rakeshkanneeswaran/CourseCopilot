@@ -62,16 +62,6 @@ def generate_tts(video_path, language_code,language_name,ssml_gender, transcript
         output_video_path = "C:\\Users\\singh\\Course_Copilot_Pro\\python_structured\\final_video.mp4"
 
 
-# Construct the FFmpeg command
-#         ffmpeg_command = [
-#     "ffmpeg",
-#     "-i", output_file,
-#     "-i", input_subtitle_path,
-#     "-c:v", "libx264",
-#     "-c:a", "copy",
-#     "-vf", f"subtitles='{input_subtitle_path}'",
-#     output_video_path
-# ]
 
         ffmpeg_command = [
     "ffmpeg",
