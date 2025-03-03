@@ -13,7 +13,7 @@ def format_transcriptions(transcriptions):
             "start_time": f"{transcription['start']:.2f}s",
             "end_time": f"{transcription['end']:.2f}s",
             "text": transcription["text"],
-            "confidence": transcription.get("confidence", "N/A"),
+            # "confidence": transcription.get("confidence", "N/A"),
         }
         formatted.append(formatted_entry)
     return formatted
@@ -85,3 +85,9 @@ def generate_transcript(video_path, output_path):
     except Exception as e:
         print(f"Error generating transcript: {str(e)}")
         raise
+
+if __name__ == "__main__" :
+    print("hell0")
+    video_path = "C:/Users/HP/Desktop/EduVerseAI/python-backend/references/english_video.mp4"
+    transcript_path = "transcript.json"
+    generate_transcript(video_path, transcript_path)

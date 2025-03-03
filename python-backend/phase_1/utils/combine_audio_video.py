@@ -3,6 +3,9 @@ import subprocess
 from pydub import AudioSegment
 from moviepy.editor import VideoFileClip
 from google.cloud import texttospeech
+import json
+
+
 
 def synthesize_speech(text, output_filename, language_code, language_name, ssml_gender):
     """
@@ -166,7 +169,6 @@ def combine_video_audio(video_path, transcription, output_path, language_code="e
         print(f"Video and audio combined successfully: {output_path}")
 
         # Clean up the generated audio file
-        os.remove(audio_path)
 
         return output_path
 
@@ -176,3 +178,23 @@ def combine_video_audio(video_path, transcription, output_path, language_code="e
     except Exception as e:
         print(f"Unexpected error: {str(e)}")
         raise
+
+if __name__ == "__main__":
+    # Example usage
+    video_path = "C:\\Users\\HP\\Desktop\\EduVerseAI\\python-backend\\references\\english_video.mp4"
+    # Load the transcription from the JSON file
+    input_file = "C:\\Users\\HP\\Desktop\\EduVerseAI\\python-backend\\phase_1\\utils\\transcript_translated.json"
+    with open(input_file, 'r', encoding='utf-8') as f:
+            transcript_data = json.load(f)
+        
+        # Normalize transcript format
+    transcription = [
+            {
+                "start_time": entry["start_time"],
+                "end_time": entry["end_time"],
+                "text": entry["text"]
+            } for entry in transcript_data
+        ]
+    output_path = "output_video.mp4"
+    subtitle_path = "output.srt"
+    combine_video_audio(video_path, transcription, output_path, subtitle_path=subtitle_path)
