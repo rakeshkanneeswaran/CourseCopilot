@@ -37,10 +37,12 @@ export default function LoginPage() {
     setIsSubmitting(true);
 
     try {
+      console.log("formData", formData);
       const result = await userLogin({
         username: formData.email,
         password: formData.password,
       });
+      console.log("result", result);
       if (result.status) {
         router.push(`/dashboard/${result.userId}`);
       }
