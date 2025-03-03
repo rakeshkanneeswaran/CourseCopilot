@@ -123,4 +123,46 @@ export class S3Service {
             throw new Error('Failed to delete project files from S3');
         }
     }
+
+    static async getFilesForSpecificLanguage({ userId, projectId, language }: { userId: string, projectId: string, language: string }) {
+        try {
+            const videoMetaData = await prismaClient.video.findMany({
+                where: {
+                    projectId: projectId,
+                    project: {
+                        userId: userId
+                    }
+                },
+                select: {
+                    videoMetaData: true
+                }
+                ,
+                orderBy: {
+                    position: 'asc'
+                }
+            })
+
+            const preSignedFilesUrls = await Promise.all(
+                videoMetaData.map(async (eachVideoMetaData) => {
+                    const getS3objectCommand = new GetObjectCommand({
+                        Bucket: eachVideoMetaData.videoMetaData?.bucketName,
+                        Key: `${userId}/${projectId}/translations/${language}/videos/${eachVideoMetaData.videoMetaData?.fileName}`
+                    });
+                    const url = await getSignedUrl(s3, getS3objectCommand, { expiresIn: 900 });
+                    return {
+                        name: eachVideoMetaData.videoMetaData!.fileName,
+                        url,
+                    };
+                })
+            );
+
+            return preSignedFilesUrls;
+
+
+        } catch (error) {
+            console.error("S3 GetFilesFromSpecificFolder Error:", error, { userId, projectId, language });
+            throw new Error('Failed to fetch files from specific folder in S3');
+
+        }
+    }
 }

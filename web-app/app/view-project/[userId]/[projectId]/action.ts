@@ -22,3 +22,13 @@ export async function deleteProject({ userId, projectId }: { userId: string, pro
         throw new Error(`Unable to delete project for user data userId ; ${userId}  projectId ${projectId} `);
     }
 }
+
+export async function getContentForSpecificLanguage({ projectId, userId, language }: { projectId: string, userId: string, language: string }) {
+    try {
+        const content = await ProjectService.getSpecificLanguageContent({ projectId, userId, language });
+        return content;
+    } catch (error) {
+        console.error('Error fetching content:', error);
+        throw new Error(`Unable to fetch content for user data userId ; ${userId}  projectId ${projectId} `);
+    }
+}

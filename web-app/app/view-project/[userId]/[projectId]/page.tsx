@@ -1,7 +1,11 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { getProjectDetailsFromS3, deleteProject } from "./action";
+import {
+  getProjectDetailsFromS3,
+  deleteProject,
+  getContentForSpecificLanguage,
+} from "./action";
 import { PlayCircle, PauseCircle } from "lucide-react";
 
 interface ProjectDetailsUrl {
@@ -79,6 +83,30 @@ export default function Page() {
         className="bg-red-500 text-white px-4 py-2 rounded-md shadow-md hover:bg-red-600 transition"
       >
         Delete Project
+      </button>
+
+      <button
+        onClick={async () => {
+          if (
+            !projectId ||
+            !userId ||
+            Array.isArray(projectId) ||
+            Array.isArray(userId)
+          ) {
+            return;
+          }
+          const language = "Spanish";
+          const newContent = await getContentForSpecificLanguage({
+            projectId,
+            userId,
+            language,
+          });
+          console.log(newContent);
+          setProjectDetailsUrl(newContent);
+        }}
+        className="bg-red-500 text-white px-4 py-2 rounded-md shadow-md hover:bg-red-600 transition"
+      >
+        Change to Spanish
       </button>
 
       <h1 className="text-3xl font-bold text-black mb-6">🎥 Project Videos</h1>
