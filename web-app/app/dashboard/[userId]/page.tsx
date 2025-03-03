@@ -44,7 +44,7 @@ const DashboardPage = () => {
         <h1 className="text-2xl font-bold">Welcome, User {userId}</h1>
         <button
           className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-slate-700"
-          onClick={() => router.push(`/createProject/${userId}`)}
+          onClick={() => router.push(`/create-project/${userId}`)}
         >
           Create New Project
         </button>
