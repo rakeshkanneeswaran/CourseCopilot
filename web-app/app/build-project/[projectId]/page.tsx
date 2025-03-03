@@ -19,6 +19,8 @@ export default function VideoUploadPage() {
   const router = useRouter();
   const projectId = params.projectId;
   const [userId, setUserId] = useState("");
+  const [progressValue, setProgressValue] = useState(0);
+  const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -51,6 +53,12 @@ export default function VideoUploadPage() {
     }
 
     setUploading(true);
+    setProcessing(true); // Start processing
+    setProgressValue(0); // Reset progress value
+
+    const totalVideos = videoFiles.length;
+    const progressIncrement = 100 / totalVideos;
+
     let position = 0;
     for (const videoFile of videoFiles) {
       if (
@@ -69,6 +77,9 @@ export default function VideoUploadPage() {
       const formData = new FormData();
       formData.append("file", renamedFile);
       await uploadVideo(formData, { userId, projectId }, position);
+
+      // Update progress value
+      setProgressValue((prev) => prev + progressIncrement);
     }
 
     const projectMetaData = {
@@ -99,13 +110,16 @@ export default function VideoUploadPage() {
       return;
     }
 
-    setUploading(false);
+    const delay = (ms: number) =>
+      new Promise((resolve) => setTimeout(resolve, ms));
+    await delay(3000);
     alert(
       "Videos uploaded successfully! , You will be notified when the processing is complete. or you can check the status in the dashboard"
     );
+    setProcessing(false);
+    setUploading(false);
     router.push(`/dashboard`);
   };
-
   const handleLanguageChange = (language: string) => {
     setSelectedLanguages((prev) =>
       prev.includes(language)
@@ -113,13 +127,12 @@ export default function VideoUploadPage() {
         : [...prev, language]
     );
   };
-
   return (
     <div>
       <div className="flex min-h-screen bg-gray-50 p-6 gap-6">
         {/* Left Panel - Video Upload */}
 
-        <div className="w-1/3 flex flex-col items-center border-r border-gray-300 p-6 ">
+        <div className="w-2/3 flex flex-col items-center border-r border-gray-300 p-6 ">
           <h1 className="text-2xl font-bold text-gray-800 mb-4">
             Upload Your Videos
           </h1>
@@ -164,10 +177,6 @@ export default function VideoUploadPage() {
             </label>
           </div>
 
-          <Button onClick={handleUpload} disabled={uploading}>
-            {uploading ? "Uploading..." : "Upload Videos"}
-          </Button>
-
           <div className="flex flex-col gap-4 overflow-y-scroll">
             {previewUrls.map((url, index) => (
               <div
@@ -193,19 +202,19 @@ export default function VideoUploadPage() {
         </div>
 
         {/* Right Panel - Processing Options */}
-        <div className="w-2/3 flex flex-col items-start p-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">
+        <div className="w-2/3 p-6 flex flex-col space-y-6">
+          <h2 className="text-xl font-bold text-gray-800">
             Processing Options
           </h2>
 
           {/* Gender Selection */}
-          <div className="flex items-center justify-between w-full mb-4">
+          <div className="flex items-center justify-between w-full">
             <span className="text-gray-700">Select Gender</span>
             <GenderToggle gender={gender} onChange={setGender} />
           </div>
 
           {/* Translation Toggle */}
-          <div className="flex items-center justify-between w-full mb-4">
+          <div className="flex items-center justify-between w-full">
             <span className="text-gray-700">Translate Video</span>
             <Switch enabled={translate} onChange={setTranslate} />
           </div>
@@ -216,25 +225,24 @@ export default function VideoUploadPage() {
               <h3 className="text-lg font-semibold text-gray-700 mb-2">
                 Select Languages:
               </h3>
-              {["English", "Spanish", "French", "German"].map((language) => (
-                <label
-                  key={language}
-                  className="flex items-center space-x-2 mb-2"
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedLanguages.includes(language)}
-                    onChange={() => handleLanguageChange(language)}
-                    className="accent-green-600"
-                  />
-                  <span className="text-gray-700">{language}</span>
-                </label>
-              ))}
+              <div className="grid grid-cols-2 gap-2">
+                {["English", "Spanish", "French", "German"].map((language) => (
+                  <label key={language} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={selectedLanguages.includes(language)}
+                      onChange={() => handleLanguageChange(language)}
+                      className="accent-green-600"
+                    />
+                    <span className="text-gray-700">{language}</span>
+                  </label>
+                ))}
+              </div>
             </div>
           )}
 
           {/* Subtitles Toggle */}
-          <div className="flex items-center justify-between w-full mt-6 mb-4">
+          <div className="flex items-center justify-between w-full">
             <span className="text-gray-700">Include Subtitles</span>
             <Switch enabled={includeSubtitles} onChange={setIncludeSubtitles} />
           </div>
@@ -247,6 +255,23 @@ export default function VideoUploadPage() {
               onChange={setGenerateTranscript}
             />
           </div>
+
+          {/* Upload Button */}
+          <Button onClick={handleUpload} disabled={uploading}>
+            {uploading ? "Uploading..." : "Upload Videos"}
+          </Button>
+
+          {/* Progress Bar */}
+          {processing && (
+            <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+              <div
+                className="bg-blue-600 text-xs font-medium text-white text-center h-full transition-all duration-300"
+                style={{ width: `${progressValue}%` }}
+              >
+                {`${Math.round(progressValue)}%`}
+              </div>
+            </div>
+          )}
         </div>
 
         {showModal && (
