@@ -207,6 +207,7 @@ async def process_video(request: ProcessVideoRequest):
                 combine_video_audio(video_path, audio_path, output_video_path)
                 
                 # 6. Upload final video to S3
+                # userid/projectid/translations/language_name/{videos,trascripts}
                 output_s3_key = f"{request.userId}/{request.projectId}/videos/{language}.mp4"
                 upload_to_s3(AWS_BUCKET, output_video_path, output_s3_key)
                 

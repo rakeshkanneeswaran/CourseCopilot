@@ -116,7 +116,7 @@ def generate_tts(video_path, language_code, language_name, ssml_gender, transcri
         print(f"Error generating TTS: {str(e)}")
         raise
 
-def combine_video_audio(video_path, transcription, output_path, language_code="en-US", language_name="en-US-Wavenet-D", ssml_gender="male", subtitle_path=None):
+def combine_video_audio(video_path, transcription, output_path, language_code="hi-IN", language_name="hi-IN-Neural2-C", ssml_gender="male", subtitle_path=None):
     """
     Generate TTS audio, combine it with the video, and optionally add subtitles.
 
