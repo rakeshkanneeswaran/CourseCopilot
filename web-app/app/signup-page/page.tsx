@@ -31,9 +31,9 @@ export default function SignupPage() {
     setError("");
     setSuccess("");
     try {
-      const result = await userSignup(formData);
+      await userSignup(formData);
       setSuccess("Signup successful!");
-      router.push(`/dashboard/${result.userId}`);
+      router.push(`/login-page`);
     } catch (err) {
       setError("Signup failed. Please try again.");
       console.log(err);

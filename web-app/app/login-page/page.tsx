@@ -27,8 +27,6 @@ export default function LoginPage() {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-
-    // Clear error when user types
     setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
@@ -37,14 +35,13 @@ export default function LoginPage() {
     setIsSubmitting(true);
 
     try {
-      console.log("formData", formData);
       const result = await userLogin({
         username: formData.email,
         password: formData.password,
       });
-      console.log("result", result);
-      if (result.status) {
-        router.push(`/dashboard/${result.userId}`);
+      if (result.token) {
+        localStorage.setItem("token", result.token);
+        router.push(`/dashboard`);
       }
     } catch (error) {
       console.error("Login failed", error);

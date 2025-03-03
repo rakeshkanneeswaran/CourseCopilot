@@ -1,9 +1,9 @@
 "use server"
-import { UserService } from "@/data-core/services/user-service"
+import { AuthenticationService } from "@/data-core/services/authentication-service"
 
 export async function userLogin({ username, password }: { username: string, password: string }) {
     try {
-        const result = await UserService.login({ username, password })
+        const result = await AuthenticationService.signIn(username, password)
         return result
 
     } catch (error) {

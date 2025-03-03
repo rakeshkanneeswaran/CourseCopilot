@@ -89,7 +89,7 @@ export default function VideoUploadPage() {
     alert(
       "Videos uploaded successfully! , You will be notified when the processing is complete. or you can check the status in the dashboard"
     );
-    router.push(`/dashboard/${userId}`);
+    router.push(`/dashboard`);
   };
 
   const handleLanguageChange = (language: string) => {

@@ -1,9 +1,10 @@
 "use client";
 
 import ProjectTable from "@/app/components/projectTable";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getProjectDetails } from "./action";
+import { getUserId } from "../action";
 
 interface Project {
   userId: string;
@@ -14,10 +15,23 @@ interface Project {
 }
 
 const DashboardPage = () => {
-  const params = useParams();
-  const userId = params.userId;
+  const [userId, setUserId] = useState<string>("");
   const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
+
+  useEffect(() => {
+    const fetchUserId = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        router.push("/login-page");
+        return;
+      }
+
+      const userId = await getUserId({ token });
+      setUserId(userId);
+    };
+    fetchUserId();
+  }, [router]);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -39,7 +53,6 @@ const DashboardPage = () => {
 
   return (
     <div className="min-h-screen bg-white text-black p-6 flex flex-col gap-6">
-      {/* Header Section */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Welcome, User {userId}</h1>
         <button

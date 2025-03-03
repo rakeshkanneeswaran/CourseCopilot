@@ -69,21 +69,25 @@ export default function App() {
         </NavbarItem>
       </NavbarContent>
       <NavbarContent justify="end">
-        <NavbarItem className="hidden lg:flex">
-          <Link href="#" className="text-white">
-            Login
-          </Link>
-        </NavbarItem>
-        <NavbarItem>
-          <Button
-            as={Link}
-            href="#"
-            variant="flat"
-            className="bg-white text-red-500"
-          >
-            Sign Up
-          </Button>
-        </NavbarItem>
+        {localStorage.getItem("token") ? (
+          <NavbarItem>
+            <Button
+              onPress={() => {
+                localStorage.removeItem("token");
+                window.location.href = "/login-page";
+              }}
+              className="text-white"
+            >
+              Logout
+            </Button>
+          </NavbarItem>
+        ) : (
+          <NavbarItem>
+            <Link href="/login-page" className="text-white">
+              Login
+            </Link>
+          </NavbarItem>
+        )}
       </NavbarContent>
     </Navbar>
   );
