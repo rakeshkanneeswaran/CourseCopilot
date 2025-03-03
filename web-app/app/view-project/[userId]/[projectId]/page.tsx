@@ -168,7 +168,7 @@ export default function Page() {
                   return;
                 }
                 await deleteProject({ userId, projectId });
-                router.push(`/dashboard/${userId}`);
+                router.push(`/dashboard`);
               }}
             >
               Delete Project

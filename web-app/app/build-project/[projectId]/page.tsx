@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { uploadVideo, initiateBackground } from "./actions";
+import { getUserId } from "@/app/action";
 
 export default function VideoUploadPage() {
   const [videoFiles, setVideoFiles] = useState<File[]>([]);
@@ -17,7 +18,20 @@ export default function VideoUploadPage() {
   const params = useParams();
   const router = useRouter();
   const projectId = params.projectId;
-  const userId = params.userId;
+  const [userId, setUserId] = useState("");
+
+  useEffect(() => {
+    const fetchUserId = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        router.push("/login");
+        return;
+      }
+      const userId = await getUserId({ token });
+      setUserId(userId);
+    };
+    fetchUserId();
+  }, [router]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
