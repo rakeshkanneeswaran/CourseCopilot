@@ -44,6 +44,14 @@ export class ProjectService {
 
     static async updateProjectStatus(projectId: string, status: string) {
         try {
+            const projectExists = await prismaClient.project.findFirst({
+                where: {
+                    id: projectId
+                }
+            })
+            if (!projectExists) {
+                throw new Error(`Project not found for id: ${projectId}`);
+            }
             await prismaClient.project.update({
                 where: { id: projectId },
                 data: { status: status },
