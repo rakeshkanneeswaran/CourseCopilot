@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   Navbar,
   NavbarBrand,
@@ -23,6 +24,14 @@ export const AcmeLogo = () => {
 };
 
 export default function App() {
+  const [token, setToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setToken(localStorage.getItem("token"));
+    }
+  }, []);
+
   return (
     <Navbar
       className="bg-gradient-to-r from-violet-500 via-pink-500 via-blue-500 to-red-500 text-white"
@@ -69,21 +78,26 @@ export default function App() {
         </NavbarItem>
       </NavbarContent>
       <NavbarContent justify="end">
-        <NavbarItem className="hidden lg:flex">
-          <Link href="#" className="text-white">
-            Login
-          </Link>
-        </NavbarItem>
-        <NavbarItem>
-          <Button
-            as={Link}
-            href="#"
-            variant="flat"
-            className="bg-white text-red-500"
-          >
-            Sign Up
-          </Button>
-        </NavbarItem>
+        {token ? (
+          <NavbarItem>
+            <Button
+              onPress={() => {
+                localStorage.removeItem("token");
+                setToken(null); // Update state after logout
+                window.location.href = "";
+              }}
+              className="text-white"
+            >
+              Logout
+            </Button>
+          </NavbarItem>
+        ) : (
+          <NavbarItem>
+            <Link href="/login-page" className="text-white">
+              Login
+            </Link>
+          </NavbarItem>
+        )}
       </NavbarContent>
     </Navbar>
   );

@@ -32,3 +32,13 @@ export async function getContentForSpecificLanguage({ projectId, userId, languag
         throw new Error(`Unable to fetch content for user data userId ; ${userId}  projectId ${projectId} `);
     }
 }
+
+export async function getProjectDetails({ projectId, userId }: { projectId: string, userId: string }) {
+    try {
+        const projectDetails = await ProjectService.getProjectDetails({ projectId, userId });
+        return projectDetails;
+    } catch (error) {
+        console.error('Error fetching project details:', error);
+        throw new Error(`Unable to fetch project details for user data userId ; ${userId}  projectId ${projectId} `);
+    }
+}

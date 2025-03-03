@@ -44,6 +44,14 @@ export class ProjectService {
 
     static async updateProjectStatus(projectId: string, status: string) {
         try {
+            const projectExists = await prismaClient.project.findFirst({
+                where: {
+                    id: projectId
+                }
+            })
+            if (!projectExists) {
+                throw new Error(`Project not found for id: ${projectId}`);
+            }
             await prismaClient.project.update({
                 where: { id: projectId },
                 data: { status: status },
@@ -146,8 +154,40 @@ export class ProjectService {
             console.error('Error fetching specific language content from S3:', error);
             throw new Error(`Unable to fetch specific language content from S3 for user data userId ; ${userId}  projectId ${projectId} and language ${language} `);
 
+        }
+    }
 
+    static async getProjectDetails({ projectId, userId }: { projectId: string, userId: string }) {
+        try {
+            const projectDetails = await prismaClient.project.findUnique({
+                where: {
+                    id: projectId,
+                    userId: userId
+                },
+                select: {
+                    userId: true,
+                    title: true,
+                    createdAt: true,
+                    id: true,
+                    status: true,
+                    projectMetaData: true
+                }
+            })
 
+            if (!projectDetails || !projectDetails.projectMetaData) {
+                throw new Error(`Project not found for userId: ${userId}, projectId: ${projectId}`);
+            }
+            return {
+                userId: projectDetails.userId,
+                title: projectDetails.title,
+                createdAt: projectDetails.createdAt,
+                id: projectDetails.id,
+                status: projectDetails.status,
+                projectMetaData: projectDetails.projectMetaData
+            };
+        } catch (error) {
+            console.error("Error fetching project details:", error);
+            throw error;
         }
     }
 

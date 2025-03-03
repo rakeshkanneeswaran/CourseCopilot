@@ -1,15 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createProject } from "./action";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { getUserId } from "@/app/action";
 
 const ProjectsPage = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const params = useParams();
   const router = useRouter();
-  const userId = params.userId;
+
+  const [userId, setUserId] = useState("");
+
+  useEffect(() => {
+    const fetchUserId = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        router.push("/login");
+        return;
+      }
+      const userId = await getUserId({ token });
+      setUserId(userId);
+    };
+    fetchUserId();
+  }, [router]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

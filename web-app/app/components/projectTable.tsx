@@ -69,9 +69,16 @@ export default function App({
               >
                 <TableCell
                   className="text-left px-4 py-3 cursor-pointer font-medium hover:underline"
-                  onClick={() =>
-                    router.push(`/view-project/${project.userId}/${project.id}`)
-                  }
+                  onClick={() => {
+                    if (project.status == "NOT_STARTED") {
+                      router.push(`/build-project/${project.id}`);
+                      return;
+                    }
+
+                    router.push(
+                      `/view-project/${project.userId}/${project.id}`
+                    );
+                  }}
                 >
                   {project.title}
                 </TableCell>
