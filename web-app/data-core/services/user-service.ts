@@ -76,4 +76,25 @@ export class UserService {
             throw new Error('Failed to signup');
         }
     }
+
+    static async findUserByCredentials({ username, password }: { username: string, password: string }) {
+        try {
+            const userExist = await prismaClient.credentials.findUnique({
+                where: {
+                    username,
+                    password
+                },
+                select: {
+                    User: true
+                }
+            })
+            if (!userExist?.User) {
+                throw new Error('User not found');
+            }
+            return userExist.User.id
+        } catch (error) {
+            console.error('Error finding user by credentials:', error);
+            throw new Error('Failed to find user by credentials');
+        }
+    }
 }
