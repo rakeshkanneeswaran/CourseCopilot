@@ -18,7 +18,7 @@ export class ProjectService {
     static async getProjectsByUserId({ userId }: { userId: string }): Promise<{
         userId: string;
         title: string;
-        description: string | null;
+        createdAt: Date
         id: string;
         status: string;
     }[]> {
@@ -26,8 +26,16 @@ export class ProjectService {
             const projects = await prismaClient.project.findMany({
                 where: {
                     userId
+                },
+                select: {
+                    userId: true,
+                    title: true,
+                    createdAt: true,
+                    id: true,
+                    status: true
                 }
             })
+            console.log("Projects:", projects);
             return projects;
         } catch (error) {
             throw error;
@@ -108,7 +116,6 @@ export class ProjectService {
         }
     }
 
-
     static async addProjectMetaData({ projectId, generate_translate, languages, generate_subtitle, generate_transcript, gender }: { projectId: string, generate_translate: boolean, languages: string[], generate_subtitle: boolean, generate_transcript: boolean, gender: string }) {
         try {
             const metaData = await prismaClient.projectMetaData.create({
@@ -128,6 +135,20 @@ export class ProjectService {
             throw error;
         }
 
+    }
+    static async getSpecificLanguageContent({ userId, projectId, language }: { userId: string, projectId: string, language: string }) {
+        try {
+            const videoUrls = await S3Service.getFilesForSpecificLanguage({ userId, projectId, language });
+            return videoUrls;
+
+        } catch (error) {
+
+            console.error('Error fetching specific language content from S3:', error);
+            throw new Error(`Unable to fetch specific language content from S3 for user data userId ; ${userId}  projectId ${projectId} and language ${language} `);
+
+
+
+        }
     }
 
 }

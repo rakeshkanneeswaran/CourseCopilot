@@ -19,7 +19,7 @@ const ProjectsPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white">
+    <div className="min-h-screen flex items-center justify-center bg-orange-50">
       <div className="w-full max-w-lg p-8 shadow-lg rounded-2xl border border-green-500">
         <h2 className="text-2xl font-bold text-green-600 mb-6 text-center">
           Create a New Project
@@ -27,7 +27,7 @@ const ProjectsPage = () => {
         <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
           <div>
             <label className="block text-green-700 font-medium mb-1">
-              Project Title
+              Project Name
             </label>
             <input
               type="text"

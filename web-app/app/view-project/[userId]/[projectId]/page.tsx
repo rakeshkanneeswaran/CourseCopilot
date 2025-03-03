@@ -1,7 +1,11 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { getProjectDetailsFromS3, deleteProject } from "./action";
+import {
+  getProjectDetailsFromS3,
+  deleteProject,
+  getContentForSpecificLanguage,
+} from "./action";
 import { PlayCircle, PauseCircle } from "lucide-react";
 
 interface ProjectDetailsUrl {
@@ -72,7 +76,7 @@ export default function Page() {
   };
 
   return (
-    <div className="min-h-screen bg-green-100 flex flex-col items-center p-6">
+    <div className="min-h-screen bg-orange-50 flex flex-col items-center p-6">
       {/* Delete Button */}
       <button
         onClick={() => setIsConfirmModalOpen(true)}
@@ -81,16 +85,37 @@ export default function Page() {
         Delete Project
       </button>
 
+      <button
+        onClick={async () => {
+          if (
+            !projectId ||
+            !userId ||
+            Array.isArray(projectId) ||
+            Array.isArray(userId)
+          ) {
+            return;
+          }
+          const language = "Spanish";
+          const newContent = await getContentForSpecificLanguage({
+            projectId,
+            userId,
+            language,
+          });
+          console.log(newContent);
+          setProjectDetailsUrl(newContent);
+        }}
+        className="bg-red-500 text-white px-4 py-2 rounded-md shadow-md hover:bg-red-600 transition"
+      >
+        Change to Spanish
+      </button>
+
       <h1 className="text-3xl font-bold text-black mb-6">🎥 Project Videos</h1>
       <div className="w-full max-w-2xl space-y-6">
         {projectDetailsUrl.map((eachFile) => (
           <div
             key={eachFile.name}
-            className="bg-white p-4 rounded-lg shadow-lg"
+            className="bg-black p-4 rounded-lg shadow-lg"
           >
-            <p className="text-lg font-semibold text-black mb-2">
-              {eachFile.name}
-            </p>
             <div className="relative">
               <video
                 id={eachFile.name}
@@ -108,6 +133,9 @@ export default function Page() {
                 )}
               </button>
             </div>
+            <p className="text-lg font-semibold text-white mb-2">
+              {eachFile.name}
+            </p>
           </div>
         ))}
       </div>
