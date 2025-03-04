@@ -139,7 +139,7 @@ if __name__ == "__main__":
     # Example for testing the function independently
     input_path = "C:\\Users\\HP\\Desktop\\EduVerseAI\\python-backend\\phase_1\\utils\\transcript.json"
     output_path = "transcript_translated.json"
-    target_lang = "Hindi"
+    target_lang = "Tamil"
     
     success = translate_transcript(input_path, output_path, target_lang)
     if success:
