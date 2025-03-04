@@ -77,7 +77,7 @@ const ProjectsPage = () => {
                 description,
                 userId,
               });
-              router.push(`/build-project/${userId}/${projectId}`);
+              router.push(`/build-project/${projectId}`);
             }}
           >
             Create Project

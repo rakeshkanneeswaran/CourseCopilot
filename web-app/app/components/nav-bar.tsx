@@ -58,22 +58,8 @@ export default function App() {
       </NavbarBrand>
       <NavbarContent className="hidden sm:flex gap-4" justify="center">
         <NavbarItem>
-          <Link color="foreground" href="#" className="text-white">
-            Features
-          </Link>
-        </NavbarItem>
-        <NavbarItem isActive>
-          <Link
-            aria-current="page"
-            href="#"
-            className="text-white font-semibold"
-          >
-            Customers
-          </Link>
-        </NavbarItem>
-        <NavbarItem>
-          <Link color="foreground" href="#" className="text-white">
-            Integrations
+          <Link color="foreground" href="/dashboard" className="text-white">
+            Dashboard
           </Link>
         </NavbarItem>
       </NavbarContent>
