@@ -18,7 +18,7 @@ from utils.transcribe import generate_transcript
 from utils.translate import translate_transcript
 from utils.combine_audio_video import combine_video_audio
 from utils.generate_srt import generate_srt   # Assuming this function exists
-
+import json
 # load_dotenv()
 # AWS Credentials
 session = boto3.Session(
@@ -209,18 +209,29 @@ async def process_video(request: ProcessVideoRequest):
                     generate_srt(translated_transcript_path, subtitle_path)
 
                     # Upload subtitle to S3
-                    subtitle_s3_key = f"{request.userId}/{request.projectId}/translate/{language}/subtitle/{video_name}.srt"
-                    upload_to_s3(AWS_BUCKET, subtitle_path, subtitle_s3_key)
+                    # subtitle_s3_key = f"{request.userId}/{request.projectId}/translate/{language}/subtitle/{video_name}.srt"
+                    # upload_to_s3(AWS_BUCKET, subtitle_path, subtitle_s3_key)
 
-                    if "subtitles" not in result:
-                        result["subtitles"] = {}
-                    result["subtitles"][language] = subtitle_s3_key
+                    # if "subtitles" not in result:
+                    #     result["subtitles"] = {}
+                    # result["subtitles"][language] = subtitle_s3_key
 
                 # 7. Generate TTS audio and combine with video
                 if translated_transcript_path:
                     logger.info(f"Generating TTS and combining video for {language}")
                     output_video_path = os.path.join(OUTPUT_DIRECTORY, f"{request.projectId}_{language}_{video_name}.mp4")
-                    combine_video_audio(video_path, translated_transcript_path, output_video_path, subtitle_path)
+                    with open(translated_transcript_path, "r", encoding="utf-8") as file:
+                        transcript_data = json.load(file)
+                    transcription = [
+                             {
+                                "start_time": entry["start_time"],
+                                "end_time": entry["end_time"],
+                                "text": entry["text"]
+                            } for entry in transcript_data
+                        ]
+
+                    # combine_video_audio(video_path, transcription, output_video_path,subtitle_path,language_code="ta-IN", language_name="ta-IN-Standard-D", ssml_gender="male")
+                    combine_video_audio(video_path, transcription, output_video_path,subtitle_path)
 
                     # 8. Upload final video to S3
                     output_s3_key = f"{request.userId}/{request.projectId}/translate/{language}/videos/{video_name}"
