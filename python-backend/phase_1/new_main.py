@@ -11,14 +11,12 @@ import os
 import subprocess
 import shutil
 from pathlib import Path
-
+from botocore.exceptions import NoCredentialsError, PartialCredentialsError, ClientError
 # Import your existing utility functions
-from references.download import download_from_s3
-from references.upload import upload_to_s3
 from utils.transcribe import generate_transcript
 from utils.translate import translate_transcript
-from utils.tts import generate_tts_audio
-from utils.combine_video_audio import combine_video_audio
+from utils.combine_audio_video import combine_video_audio
+from utils.generate_srt import generate_srt   # Assuming this function exists
 
 # AWS Credentials
 session = boto3.Session(
@@ -41,26 +39,76 @@ s3_client = session.client("s3")
 os.makedirs(TEMP_DIRECTORY, exist_ok=True)
 os.makedirs(OUTPUT_DIRECTORY, exist_ok=True)
 
-async def s3_upload(contents: bytes, key: str):
-    """Uploads file to S3 in the specified directory"""
-    full_key = f"{S3_DIRECTORY}{key}"  # Store in the specific path
-    logger.info(f"Uploading {full_key} to S3")
-    try:
-        s3_client.put_object(Bucket=AWS_BUCKET, Key=full_key, Body=contents)
-        return full_key  # Return full S3 path
-    except ClientError as e:
-        logger.error(f"S3 Upload Error: {str(e)}")
-        return None
 
-async def s3_download(key: str):
-    """Downloads file from S3"""
+
+
+def upload_to_s3(bucket_name: str, local_path: str, s3_key: str) -> bool:
+    """
+    Upload a file from a local path to an S3 bucket.
+
+    Args:
+        bucket_name (str): Name of the S3 bucket.
+        local_path (str): Local path of the file to upload.
+        s3_key (str): S3 key (path) where the file will be stored.
+
+    Returns:
+        bool: True if the upload was successful, False otherwise.
+    """
+    s3_client = boto3.client("s3")
     try:
-        full_key = f"{S3_DIRECTORY}{key}"
-        obj = s3_client.get_object(Bucket=AWS_BUCKET, Key=full_key)
-        return obj["Body"].read()
+        logger.info(f"Uploading {local_path} to S3 bucket {bucket_name} at {s3_key}")
+        s3_client.upload_file(local_path, bucket_name, s3_key)
+        logger.info("Upload successful")
+        return True
+    except FileNotFoundError:
+        logger.error(f"The local file {local_path} does not exist.")
+        return False
+    except NoCredentialsError:
+        logger.error("No AWS credentials found.")
+        return False
+    except PartialCredentialsError:
+        logger.error("Incomplete AWS credentials provided.")
+        return False
     except ClientError as e:
-        logger.error(f"S3 Download Error: {str(e)}")
-        return None
+        logger.error(f"S3 Client Error: {str(e)}")
+        return False
+    except Exception as e:
+        logger.error(f"Unexpected error: {str(e)}")
+        return False
+
+def download_from_s3(bucket_name: str, s3_key: str, local_path: str) -> bool:
+    """
+    Download a file from an S3 bucket to a local path.
+
+    Args:
+        bucket_name (str): Name of the S3 bucket.
+        s3_key (str): S3 key (path) of the file to download.
+        local_path (str): Local path where the file will be saved.
+
+    Returns:
+        bool: True if the download was successful, False otherwise.
+    """
+    s3_client = boto3.client("s3")
+    try:
+        logger.info(f"Downloading {s3_key} from S3 bucket {bucket_name} to {local_path}")
+        s3_client.download_file(bucket_name, s3_key, local_path)
+        logger.info("Download successful")
+        return True
+    except FileNotFoundError:
+        logger.error(f"The local path {local_path} does not exist.")
+        return False
+    except NoCredentialsError:
+        logger.error("No AWS credentials found.")
+        return False
+    except PartialCredentialsError:
+        logger.error("Incomplete AWS credentials provided.")
+        return False
+    except ClientError as e:
+        logger.error(f"S3 Client Error: {str(e)}")
+        return False
+    except Exception as e:
+        logger.error(f"Unexpected error: {str(e)}")
+        return False
 
 # Define Pydantic models for input validation
 class ProjectMetaData(BaseModel):
@@ -151,16 +199,26 @@ async def process_video(request: ProcessVideoRequest):
                     translated_transcript_path = os.path.join(lang_dir, f"transcript_{language}_{video_name}.json")
                     translate_transcript(transcript_path, translated_transcript_path, language)
 
-                # 6. Generate TTS audio
-                if translated_transcript_path:
-                    logger.info(f"Generating TTS for {language}")
-                    audio_path = os.path.join(lang_dir, f"audio_{language}_{video_name}.mp3")
-                    generate_tts_audio(translated_transcript_path, audio_path, gender=request.projectMetaData.gender)
+                # 6. Generate SRT file if needed
+                subtitle_path = None
+                if request.projectMetaData.generate_subtitle and translated_transcript_path:
+                    logger.info(f"Generating SRT for {language}")
+                    subtitle_path = os.path.join(lang_dir, f"subtitle_{language}_{video_name}.srt")
+                    generate_srt(translated_transcript_path, subtitle_path)
 
-                    # 7. Combine video with audio
+                    # Upload subtitle to S3
+                    subtitle_s3_key = f"{request.userId}/{request.projectId}/translate/{language}/subtitle/{video_name}.srt"
+                    upload_to_s3(AWS_BUCKET, subtitle_path, subtitle_s3_key)
+
+                    if "subtitles" not in result:
+                        result["subtitles"] = {}
+                    result["subtitles"][language] = subtitle_s3_key
+
+                # 7. Generate TTS audio and combine with video
+                if translated_transcript_path:
+                    logger.info(f"Generating TTS and combining video for {language}")
                     output_video_path = os.path.join(OUTPUT_DIRECTORY, f"{request.projectId}_{language}_{video_name}.mp4")
-                    logger.info(f"Combining video and audio for {language}")
-                    combine_video_audio(video_path, audio_path, output_video_path)
+                    combine_video_audio(video_path, translated_transcript_path, output_video_path, subtitle_path)
 
                     # 8. Upload final video to S3
                     output_s3_key = f"{request.userId}/{request.projectId}/translate/{language}/video/{video_name}"
@@ -169,20 +227,7 @@ async def process_video(request: ProcessVideoRequest):
                     # Add to result
                     result["processed_videos"][language] = output_s3_key
 
-                    # 9. Upload subtitle file if needed
-                    if request.projectMetaData.generate_subtitle:
-                        subtitle_path = os.path.join(lang_dir, f"subtitle_{language}_{video_name}.srt")
-                        # Assuming the subtitle generation is handled in one of your functions
-                        # generate_subtitle(translated_transcript_path, subtitle_path)
-
-                        subtitle_s3_key = f"{request.userId}/{request.projectId}/translate/{language}/subtitle/{video_name}.srt"
-                        upload_to_s3(AWS_BUCKET, subtitle_path, subtitle_s3_key)
-
-                        if "subtitles" not in result:
-                            result["subtitles"] = {}
-                        result["subtitles"][language] = subtitle_s3_key
-
-        # 10. Clean up temporary files
+        # 9. Clean up temporary files
         shutil.rmtree(project_temp_dir)
 
         return {"message": "Download and processing successful", "results": result}
