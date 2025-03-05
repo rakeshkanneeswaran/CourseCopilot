@@ -1,5 +1,5 @@
 import os
-import whisper
+import whisper_timestamped as whisper
 from moviepy.video.io.VideoFileClip import VideoFileClip
 
 def format_transcriptions(transcriptions):
@@ -88,6 +88,6 @@ def generate_transcript(video_path, output_path):
 
 if __name__ == "__main__" :
     print("hell0")
-    video_path = "C:/Users/HP/Desktop/EduVerseAI/python-backend/references/Claude37.mp4"
+    video_path = "C:/Users/HP/Desktop/project/EduVerseAI/video-processor/references/Claude37.mp4"
     transcript_path = "transcript.json"
     generate_transcript(video_path, transcript_path)

@@ -19,7 +19,7 @@ def convert_to_srt(data):
         srt_content += f"{entry['text']}\n\n"
     return srt_content
 
-def generate_srt(file_path):
+def generate_srt(file_path, output_path):
     with open(file_path, "r", encoding="utf-8") as file:
         text_data = file.read()
 
@@ -27,10 +27,10 @@ def generate_srt(file_path):
     srt_content = convert_to_srt(data)
 
 
-    with open("output.srt", "w", encoding="utf-8") as file:
+    with open(output_path, "w", encoding="utf-8") as file:
         file.write(srt_content)
 
     print("SRT file created successfully.")
 
 if __name__ == "__main__":
-    generate_srt("transcript_translated.json")
+    generate_srt("transcript_translated.json","output.srt")

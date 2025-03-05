@@ -116,7 +116,7 @@ def generate_tts(video_path, language_code, language_name, ssml_gender, transcri
         print(f"Error generating TTS: {str(e)}")
         raise
 
-def combine_video_audio(video_path, transcription, output_path, language_code="ta-IN", language_name="ta-IN-Standard-D", ssml_gender="male", subtitle_path=None):
+def combine_video_audio(video_path, transcription, output_path,subtitle_path,  language_code="ta-IN", language_name="ta-IN-Standard-D", ssml_gender="male"):
     """
     Generate TTS audio, combine it with the video, and optionally add subtitles.
 
@@ -181,9 +181,9 @@ def combine_video_audio(video_path, transcription, output_path, language_code="t
 
 if __name__ == "__main__":
     # Example usage
-    video_path = "C:\\Users\\HP\\Desktop\\EduVerseAI\\python-backend\\references\\Claude37.mp4"
+    video_path = "C:\\Users\\HP\\Desktop\\project\\EduVerseAI\\video-processor\\references\\Claude37.mp4"
     # Load the transcription from the JSON file
-    input_file = "C:\\Users\\HP\\Desktop\\EduVerseAI\\python-backend\\phase_1\\utils\\transcript_translated.json"
+    input_file = "C:\\Users\\HP\\Desktop\\project\\EduVerseAI\\video-processor\\phase_1\\utils\\transcript_translated.json"
     with open(input_file, 'r', encoding='utf-8') as f:
             transcript_data = json.load(f)
         

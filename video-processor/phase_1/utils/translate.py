@@ -137,7 +137,7 @@ def translate_transcript(input_file, output_file, target_language):
 # Example usage
 if __name__ == "__main__":
     # Example for testing the function independently
-    input_path = "C:\\Users\\HP\\Desktop\\EduVerseAI\\python-backend\\phase_1\\utils\\transcript.json"
+    input_path = "C:\\Users\\HP\\Desktop\\project\\EduVerseAI\\video-processor\\phase_1\\utils\\transcript.json"
     output_path = "transcript_translated.json"
     target_lang = "Tamil"
     
