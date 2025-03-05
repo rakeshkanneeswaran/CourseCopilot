@@ -1,6 +1,6 @@
 import os
 import whisper
-from moviepy.editor import VideoFileClip
+from moviepy.video.io.VideoFileClip import VideoFileClip
 
 def format_transcriptions(transcriptions):
     """

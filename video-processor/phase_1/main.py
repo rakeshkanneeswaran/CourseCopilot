@@ -1,7 +1,7 @@
 from uuid import uuid4
 import boto3
 from botocore.exceptions import ClientError
-import magic
+# import magic
 import uvicorn
 from fastapi import FastAPI, HTTPException, Response, UploadFile, status, Body
 from pydantic import BaseModel
@@ -12,17 +12,16 @@ import subprocess
 import shutil
 from pathlib import Path
 from botocore.exceptions import NoCredentialsError, PartialCredentialsError, ClientError
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 # Import your existing utility functions
 from utils.transcribe import generate_transcript
 from utils.translate import translate_transcript
 from utils.combine_audio_video import combine_video_audio
 from utils.generate_srt import generate_srt   # Assuming this function exists
 
-load_dotenv()
+# load_dotenv()
 # AWS Credentials
 session = boto3.Session(
-    's3',
     aws_access_key_id='AKIAZOZQFQWQYVUHJSVG',
     aws_secret_access_key='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',
     region_name='ap-south-1'

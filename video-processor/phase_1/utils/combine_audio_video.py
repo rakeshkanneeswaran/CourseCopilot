@@ -1,7 +1,7 @@
 import os
 import subprocess
 from pydub import AudioSegment
-from moviepy.editor import VideoFileClip
+from moviepy.video.io.VideoFileClip import VideoFileClip
 from google.cloud import texttospeech
 import json
 

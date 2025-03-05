@@ -1,7 +1,7 @@
 from uuid import uuid4
 import boto3
 from botocore.exceptions import ClientError
-import magic
+# import magic
 import uvicorn
 from fastapi import FastAPI, HTTPException, Response, UploadFile, status, Body
 from pydantic import BaseModel
@@ -18,7 +18,7 @@ from references.upload import upload_to_s3
 from utils.transcribe import generate_transcript
 from utils.translate import translate_transcript
 from utils.tts import generate_tts_audio
-from utils.combine_video_audio import combine_video_audio
+from utils.combine_audio_video import combine_video_audio
 
 # AWS Credentials
 session = boto3.Session(
@@ -99,12 +99,12 @@ async def upload(file: UploadFile | None = None):
             detail="Supported file size is 0 - 100 MB"
         )
 
-    file_type = magic.from_buffer(buffer=contents, mime=True)
-    if file_type not in {"video/mp4": "mp4"}:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Unsupported file type: {file_type}. Only MP4 allowed."
-        )
+    # file_type = magic.from_buffer(buffer=contents, mime=True)
+    # if file_type not in {"video/mp4": "mp4"}:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_400_BAD_REQUEST,
+    #         detail=f"Unsupported file type: {file_type}. Only MP4 allowed."
+    #     )
 
     file_name = f"{uuid4()}.mp4"  # Generate unique file name
     full_s3_path = await s3_upload(contents=contents, key=file_name)
