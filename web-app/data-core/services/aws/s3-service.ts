@@ -173,7 +173,7 @@ export class S3Service {
                 Bucket: bucket,
                 Key: key
             });
-            const url = await getSignedUrl(s3, getS3objectCommand, { expiresIn: 900 });
+            const url = await getSignedUrl(s3, getS3objectCommand, { expiresIn: 3600 });
             return url
         } catch (error) {
             console.error("S3 GetPresignedUrl Error:", error, { bucket, key });

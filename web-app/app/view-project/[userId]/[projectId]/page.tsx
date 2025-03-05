@@ -1,74 +1,45 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import {
-  getProjectDetailsFromS3,
-  deleteProject,
-  getContentForSpecificLanguage,
-  getProjectDetails,
-  getOriginalContent,
-} from "./action";
 
-interface ProjectDetailsUrl {
-  name: string;
-  url: string;
-}
+import React, { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { getOriginalContent } from "./action";
 
 interface VideoTranscriptMap {
   videoUrl: string;
   transcriptUrl: string;
 }
 
-interface ProjectDetails {
-  userId: string;
-  title: string;
-  createdAt: Date;
-  id: string;
-  status: string;
-  projectMetaData: {
-    projectId: string;
-    id: string;
-    generate_translate: boolean;
-    generate_subtitle: boolean;
-    languages: string[];
-    generate_transcript: boolean;
-    gender: string;
-  };
+interface VideoTranscript {
+  id: number;
+  start_time: string;
+  end_time: string;
+  text: string;
 }
 
 export default function Page() {
-  const params = useParams();
-  const router = useRouter();
-  const projectId = params.projectId;
-  const userId = params.userId;
-  const [projectDetailsUrl, setProjectDetailsUrl] = useState<
-    ProjectDetailsUrl[]
-  >([]);
-  const [selectedVideo, setSelectedVideo] = useState<ProjectDetailsUrl | null>(
-    null
-  );
-  const [projectDetails, setProjectDetails] = useState({} as ProjectDetails);
-  // Removed duplicate VideoTranscriptMap interface
+  const { projectId, userId } = useParams() as {
+    projectId: string;
+    userId: string;
+  };
 
-  const [originalContent, setOriginalContent] = useState<VideoTranscriptMap[]>(
+  const [selectedContent, setSelectedContent] =
+    useState<VideoTranscriptMap | null>(null);
+  const [projectContent, setProjectContent] = useState<VideoTranscriptMap[]>(
     []
   );
+  const [videoIndex, setVideoIndex] = useState(0);
+  const [selectedVideoTranscript, setSelectedVideoTranscript] =
+    useState<string>("");
 
   useEffect(() => {
+    if (!userId || !projectId) return;
     const fetchProjects = async () => {
-      if (!userId || !projectId) return;
       try {
-        if (
-          !projectId ||
-          !userId ||
-          Array.isArray(projectId) ||
-          Array.isArray(userId)
-        ) {
-          return;
-        }
-        const response = await getOriginalContent({ userId, projectId });
-        if (response && response.length > 0) {
-          setOriginalContent(response);
+        const content = await getOriginalContent({ userId, projectId });
+        console.log("Original content:", content);
+        if (content.length) {
+          setProjectContent(content);
+          setSelectedContent(content[0]);
         }
       } catch (error) {
         console.error("Error fetching projects", error);
@@ -78,155 +49,94 @@ export default function Page() {
   }, [userId, projectId]);
 
   useEffect(() => {
-    const fetchProjects = async () => {
-      if (!userId || !projectId) return;
-      try {
-        if (
-          !projectId ||
-          !userId ||
-          Array.isArray(projectId) ||
-          Array.isArray(userId)
-        ) {
-          return;
-        }
-        const response = await getProjectDetailsFromS3({ userId, projectId });
-        if (response && response.length > 0) {
-          setProjectDetailsUrl(response);
-          setSelectedVideo(response[0]); // Default to first video
-        }
-      } catch (error) {
-        console.error("Error fetching projects", error);
-      }
+    const fetchTranscript = async () => {
+      const response = await fetch(selectedContent!.transcriptUrl);
+      const data = (await response.json()) as VideoTranscript[];
+      const transcript = transformTranscript({ transcriptArray: data });
+      setSelectedVideoTranscript(transcript);
     };
-    fetchProjects();
-  }, [userId, projectId]);
 
-  useEffect(() => {
-    const fetchProjectDetails = async () => {
-      if (!userId || !projectId) return;
-      try {
-        if (
-          !projectId ||
-          !userId ||
-          Array.isArray(projectId) ||
-          Array.isArray(userId)
-        ) {
-          return;
-        }
-        const response = await getProjectDetails({ userId, projectId });
-        if (response) setProjectDetails(response);
-      } catch (error) {
-        console.error("Error fetching project details", error);
-      }
-    };
-    fetchProjectDetails();
-  }, [userId, projectId]);
+    fetchTranscript();
+  }, [selectedContent]);
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center p-6">
-      <div className="flex w-full max-w-5xl space-x-6">
-        {/* Left Side - Selected Video */}
-        <div className="w-2/3">
-          {selectedVideo && (
+    <div className="min-h-screen bg-[#faf8f4] flex flex-col items-center p-6">
+      {/* Main Content Area */}
+      <div className="flex w-full px-44 space-x-6">
+        {/* Left Side (Video + Transcript) */}
+        <div className="w-2/3 flex flex-col">
+          {/* Video */}
+          {selectedContent && (
             <div className="bg-black p-4 rounded-lg shadow-lg">
               <video
-                id="main-video"
-                src={selectedVideo.url}
+                src={selectedContent.videoUrl}
                 className="w-full rounded-md"
                 controls
               />
-              <p className="text-lg font-semibold text-white mt-2">
-                {selectedVideo.name}
-              </p>
             </div>
           )}
+
+          {/* Transcript */}
+          <div className="mt-4 p-4 bg-[#eceae0]  text-black rounded-lg shadow-lg max-h-60 overflow-y-auto">
+            <h2 className="text-xl font-semibold mb-3">Transcript</h2>
+            {selectedVideoTranscript ? (
+              <p className="p-2 rounded-md shadow-sm">
+                {selectedVideoTranscript}
+              </p>
+            ) : (
+              <p className="text-gray-500">No transcript available.</p>
+            )}
+          </div>
         </div>
 
-        {/* Right Side - Project Details */}
-        <div className="w-1/3 bg-white p-4 rounded-lg shadow-xl">
-          <h1 className="text-2xl font-bold text-black">Project Details</h1>
-          <p className="text-gray-600">Title: {projectDetails.title}</p>
-          <p className="text-gray-600">Status: {projectDetails.status}</p>
-          <p className="text-gray-600">
-            Created At: {projectDetails.createdAt?.toString()}
-          </p>
-          <p className="text-gray-600">
-            Languages: {projectDetails.projectMetaData?.languages?.join(", ")}
-          </p>
-
-          {/* Language Selection */}
-          <div className="mt-4">
-            <label className="block text-black font-semibold mb-1">
-              Select Language:
-            </label>
-            <select
-              className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-              onChange={async (e) => {
-                if (
-                  !projectId ||
-                  !userId ||
-                  Array.isArray(projectId) ||
-                  Array.isArray(userId)
-                ) {
-                  return;
-                }
-                const newContentData = await getContentForSpecificLanguage({
-                  projectId,
-                  userId,
-                  language: e.target.value,
-                });
-
-                setProjectDetailsUrl(newContentData);
-              }}
-            >
-              {projectDetails.projectMetaData?.languages?.map((lang) => (
-                <option key={lang} value={lang}>
-                  {lang}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Delete Button (Aligned to Right) */}
-          <div className="flex justify-end mt-4">
-            <button
-              type="button"
-              className="text-red-700 hover:text-white border border-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-5 py-2.5"
-              onClick={async () => {
-                if (
-                  !projectId ||
-                  !userId ||
-                  Array.isArray(projectId) ||
-                  Array.isArray(userId)
-                ) {
-                  return;
-                }
-                await deleteProject({ userId, projectId });
-                router.push(`/dashboard`);
-              }}
-            >
-              Delete Project
-            </button>
-          </div>
+        {/* Right Side (Empty for Future Content) */}
+        <div className="w-1/3 bg-[#f5f3eb] rounded-lg shadow-lg flex items-center justify-center">
+          <p className="text-gray-400 italic">Future content will be here</p>
         </div>
       </div>
 
-      {/* Bottom - Video List */}
-      <div className="w-full mt-6 overflow-x-auto flex space-x-4 p-4 bg-gray-200 rounded-lg">
-        {projectDetailsUrl.map((eachFile) => (
-          <div
-            key={eachFile.name}
-            className="bg-black p-4 rounded-lg shadow-lg cursor-pointer min-w-[200px]"
-            onClick={() => setSelectedVideo(eachFile)}
-          >
-            <video src={eachFile.url} className="w-full rounded-md" />
-            <p className="text-lg font-semibold text-white mt-2 text-center">
-              {eachFile.name}
-            </p>
-          </div>
-        ))}
+      {/* Navigation Buttons */}
+      <div className="flex space-x-5 mt-6">
+        <button
+          className="px-4 py-2 font-bold bg-[#c05e3c] text-white rounded-md disabled:opacity-50"
+          disabled={videoIndex === 0}
+          onClick={() => {
+            setVideoIndex((prev) => prev - 1);
+            setSelectedContent(projectContent[videoIndex - 1]);
+          }}
+        >
+          Previous
+        </button>
+
+        <button
+          className="px-4 py-2 font-bold bg-[#c05e3c] text-white rounded-md disabled:opacity-50"
+          disabled={videoIndex >= projectContent.length - 1}
+          onClick={() => {
+            setVideoIndex((prev) => prev + 1);
+            setSelectedContent(projectContent[videoIndex + 1]);
+          }}
+        >
+          Next
+        </button>
       </div>
-      <p className="text-black">{JSON.stringify(originalContent)}</p>
     </div>
   );
+}
+
+function transformTranscript({
+  transcriptArray,
+}: {
+  transcriptArray: VideoTranscript[];
+}): string {
+  try {
+    let transformedTranscript = "";
+    transcriptArray.forEach((transcript) => {
+      transformedTranscript += `${transcript.text}`;
+    });
+
+    return transformedTranscript;
+  } catch (error) {
+    console.error("Error transforming transcript:", error);
+    throw new Error("Failed to transform transcript");
+  }
 }
