@@ -42,3 +42,13 @@ export async function getProjectDetails({ projectId, userId }: { projectId: stri
         throw new Error(`Unable to fetch project details for user data userId ; ${userId}  projectId ${projectId} `);
     }
 }
+
+export async function getOriginalContent({ userId, projectId }: { userId: string, projectId: string }) {
+    try {
+        const result = await ProjectService.getProjectOriginalContent({ userId, projectId });
+        return result;
+    } catch (error) {
+        console.error('Error getting original content:', error);
+        throw new Error('Failed to get original content');
+    }
+}

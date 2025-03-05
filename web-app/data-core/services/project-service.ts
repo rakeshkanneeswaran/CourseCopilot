@@ -1,5 +1,10 @@
 import prismaClient from "@/data-core/database";
 import { S3Service } from "./aws/s3-service";
+
+interface VideoTranscriptMap {
+    videoUrl: string,
+    transcriptUrl: string
+}
 export class ProjectService {
     static async createProject({ userId, title, description }: { userId: string, title: string, description: string }): Promise<string> {
         try {
@@ -188,6 +193,40 @@ export class ProjectService {
         } catch (error) {
             console.error("Error fetching project details:", error);
             throw error;
+        }
+    }
+
+    static async getProjectOriginalContent({ projectId, userId }: { projectId: string, userId: string }) {
+
+        try {
+            const projectDetails = await prismaClient.project.findFirst({
+                where: { id: projectId, userId: userId },
+                select: {
+                    videos: {
+                        select: { videoMetaData: true },
+                        orderBy: { position: 'asc' }
+                    }
+                }
+            })
+
+            const videoTranscriptMap: VideoTranscriptMap[] = []
+
+            if (!projectDetails || !projectDetails.videos || projectDetails.videos.length === 0) {
+                return []
+            }
+            for (const video of projectDetails.videos) {
+                const videoKey = `${userId}/${projectId}/original_content/videos/${video.videoMetaData?.fileName}`
+                const videoUrl = await S3Service.getPresignedUrl({ bucket: process.env.VIDEO_BUCKET_NAME!, key: videoKey })
+                const jsonFileName = video.videoMetaData?.fileName.replace(/\.mp4$/, ".json");
+                const transcriptKey = `${userId}/${projectId}/original_content/transcripts/${jsonFileName}`
+                const transcriptUrl = await S3Service.getPresignedUrl({ bucket: process.env.VIDEO_BUCKET_NAME!, key: transcriptKey })
+                videoTranscriptMap.push({ videoUrl, transcriptUrl })
+
+            }
+            return videoTranscriptMap;
+        } catch (error) {
+            console.error('Error fetching project original content from S3:', error);
+            throw new Error(`Unable to fetch project original content from S3 for user data userId ; ${userId}  projectId ${projectId} `);
         }
     }
 

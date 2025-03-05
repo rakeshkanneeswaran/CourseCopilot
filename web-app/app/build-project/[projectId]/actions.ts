@@ -1,6 +1,7 @@
 "use server"
 
 import { BackgroundService } from "@/data-core/services/background-service";
+import { ProjectService } from "@/data-core/services/project-service";
 import { VideoService } from "@/data-core/services/video-service";
 
 interface ProjectMetaData {
@@ -27,5 +28,15 @@ export async function initiateBackground({ userId, projectId, projectMetaData }:
     } catch (error) {
         console.error('Error sending message to kafka:', error);
         throw new Error('Failed to initiate background process');
+    }
+}
+
+export async function getOriginalContent({ userId, projectId }: { userId: string, projectId: string }) {
+    try {
+        const result = await ProjectService.getProjectOriginalContent({ userId, projectId });
+        return result;
+    } catch (error) {
+        console.error('Error getting original content:', error);
+        throw new Error('Failed to get original content');
     }
 }

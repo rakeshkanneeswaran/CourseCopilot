@@ -165,4 +165,21 @@ export class S3Service {
 
         }
     }
+
+    static async getPresignedUrl({ bucket, key }: { bucket: string, key: string }) {
+
+        try {
+            const getS3objectCommand = new GetObjectCommand({
+                Bucket: bucket,
+                Key: key
+            });
+            const url = await getSignedUrl(s3, getS3objectCommand, { expiresIn: 900 });
+            return url
+        } catch (error) {
+            console.error("S3 GetPresignedUrl Error:", error, { bucket, key });
+            throw new Error('Failed to create presigned url for the file');
+        }
+
+
+    }
 }

@@ -6,11 +6,17 @@ import {
   deleteProject,
   getContentForSpecificLanguage,
   getProjectDetails,
+  getOriginalContent,
 } from "./action";
 
 interface ProjectDetailsUrl {
   name: string;
   url: string;
+}
+
+interface VideoTranscriptMap {
+  videoUrl: string;
+  transcriptUrl: string;
 }
 
 interface ProjectDetails {
@@ -42,6 +48,34 @@ export default function Page() {
     null
   );
   const [projectDetails, setProjectDetails] = useState({} as ProjectDetails);
+  // Removed duplicate VideoTranscriptMap interface
+
+  const [originalContent, setOriginalContent] = useState<VideoTranscriptMap[]>(
+    []
+  );
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      if (!userId || !projectId) return;
+      try {
+        if (
+          !projectId ||
+          !userId ||
+          Array.isArray(projectId) ||
+          Array.isArray(userId)
+        ) {
+          return;
+        }
+        const response = await getOriginalContent({ userId, projectId });
+        if (response && response.length > 0) {
+          setOriginalContent(response);
+        }
+      } catch (error) {
+        console.error("Error fetching projects", error);
+      }
+    };
+    fetchProjects();
+  }, [userId, projectId]);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -192,6 +226,7 @@ export default function Page() {
           </div>
         ))}
       </div>
+      <p className="text-black">{JSON.stringify(originalContent)}</p>
     </div>
   );
 }
