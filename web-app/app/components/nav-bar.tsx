@@ -34,7 +34,7 @@ export default function App() {
 
   return (
     <Navbar
-      className="bg-gradient-to-r from-violet-500 via-pink-500 via-blue-500 to-red-500 text-white"
+      className="bg-[#c05e3c] text-white"
       classNames={{
         item: [
           "flex",
