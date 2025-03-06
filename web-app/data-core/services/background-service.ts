@@ -1,5 +1,5 @@
-import { KafkaService } from "./kafka-service";
 import { ProjectService } from "./project-service";
+import axios from "axios";
 interface ProjectMetaData {
     generate_translate: boolean;
     generate_subtitle: boolean;
@@ -13,10 +13,16 @@ interface ProjectMetaData {
 export class BackgroundService {
     static async initiateBackground({ userId, projectId, projectMetaData }: { userId: string, projectId: string, projectMetaData: ProjectMetaData }) {
         try {
-            const result = await KafkaService.sendMessageToKafka(process.env.KAFKA_TOPIC!, JSON.stringify({ userId, projectId, projectMetaData }))
             await ProjectService.updateProjectStatus(projectId, 'IN_PROGRESS')
             await ProjectService.addProjectMetaData({ projectId, ...projectMetaData })
-            return result
+            const response = await axios.post("http://localhost:3002/process-video", {
+                userId, projectId, projectMetaData
+            });
+            if (response.status != 200 || response.data.pojectId != projectId || response.data.received != true) {
+                await ProjectService.updateProjectStatus(projectId, 'FAILED')
+            }
+
+            return true
         } catch (error) {
             console.error('Error sending message to kafka:', error);
             throw new Error('Failed to initiate background process');

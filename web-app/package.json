@@ -16,6 +16,7 @@
     "@heroui/spinner": "^2.2.12",
     "@prisma/client": "^6.4.1",
     "@types/jsonwebtoken": "^9.0.9",
+    "axios": "^1.8.1",
     "jsonwebtoken": "^9.0.2",
     "kafkajs": "^2.2.4",
     "lucide-react": "^0.477.0",
