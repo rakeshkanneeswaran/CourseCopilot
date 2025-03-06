@@ -167,7 +167,7 @@ async def process_video(request: ProcessVideoRequest, background_tasks: Backgrou
             download_from_s3(AWS_BUCKET, video_key, video_path)
         logger.info("Download successful")
         background_tasks.add_task(process_video_async, request, project_temp_dir, response["Contents"])
-        return {"received" : True, "projectId": projectId}
+        return {"received" : True, "projectId": projectId, "userId": userId, "projectMetaData": projectMetaData}
     
     except Exception as e:
         logger.error(f"Error processing video: {str(e)}")
