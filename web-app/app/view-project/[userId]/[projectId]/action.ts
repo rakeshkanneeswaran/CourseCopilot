@@ -52,3 +52,15 @@ export async function getOriginalContent({ userId, projectId }: { userId: string
         throw new Error('Failed to get original content');
     }
 }
+
+export async function getContentForDifferentLanguage({ userId, projectId, languageName }: { userId: string, projectId: string, languageName: string }) {
+    try {
+        const result = await ProjectService.getProjectContentForDifferentLanguages({ userId, projectId, languageName })
+        return result
+    } catch (error) {
+        console.error('Error getting content for Different:', error);
+        throw new Error('Failed to get  content for Different language');
+
+    }
+
+}
