@@ -185,7 +185,7 @@ async def process_video(request: ProcessVideoRequest):
                 generate_transcript(video_path, transcript_path)
 
                 # Upload transcript to S3
-                transcript_s3_key = f"{request.userId}/{request.projectId}/transcripts/{video_name}.json"
+                transcript_s3_key = f"{request.userId}/{request.projectId}/originial_content/transcripts/{video_name}.json"
                 upload_to_s3(AWS_BUCKET, transcript_path, transcript_s3_key)
                 result["transcript"] = transcript_s3_key
 
@@ -201,6 +201,9 @@ async def process_video(request: ProcessVideoRequest):
                     translated_transcript_path = os.path.join(lang_dir, f"transcript_{language}_{video_name}.json")
                     translate_transcript(transcript_path, translated_transcript_path, language)
 
+                    # Upload translated transcript to S3
+                    translated_transcript_s3_key = f"{request.userId}/{request.projectId}/processed/{language}/transcripts/{video_name}.json"
+                    upload_to_s3(AWS_BUCKET, translated_transcript_path, translated_transcript_s3_key)
                 # 6. Generate SRT file if needed
                 subtitle_path = None
                 if request.projectMetaData.generate_subtitle and translated_transcript_path:
@@ -234,7 +237,7 @@ async def process_video(request: ProcessVideoRequest):
                     combine_video_audio(video_path, transcription, output_video_path,subtitle_path)
 
                     # 8. Upload final video to S3
-                    output_s3_key = f"{request.userId}/{request.projectId}/translate/{language}/videos/{video_name}"
+                    output_s3_key = f"{request.userId}/{request.projectId}/processed/{language}/videos/{video_name}"
                     upload_to_s3(AWS_BUCKET, output_video_path, output_s3_key)
 
                     # Add to result
