@@ -263,6 +263,7 @@ async def process_video_async(request, project_temp_dir, video_contents):
 
         # 9. Clean up temporary files
         shutil.rmtree(project_temp_dir)
+        shutil.rmtree(OUTPUT_DIRECTORY)
 
         return {"message": "Download and processing successful", "results": result}
 
