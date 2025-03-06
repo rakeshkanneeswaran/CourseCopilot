@@ -217,7 +217,7 @@ export class ProjectService {
             for (const video of projectDetails.videos) {
                 const videoKey = `${userId}/${projectId}/original_content/videos/${video.videoMetaData?.fileName}`
                 const videoUrl = await S3Service.getPresignedUrl({ bucket: process.env.VIDEO_BUCKET_NAME!, key: videoKey })
-                const jsonFileName = video.videoMetaData?.fileName.replace(/\.mp4$/, ".json");
+                const jsonFileName = video.videoMetaData?.fileName.replace(/\.mp4$/, ".mp4.json");
                 const transcriptKey = `${userId}/${projectId}/original_content/transcripts/${jsonFileName}`
                 const transcriptUrl = await S3Service.getPresignedUrl({ bucket: process.env.VIDEO_BUCKET_NAME!, key: transcriptKey })
                 videoTranscriptMap.push({ videoUrl, transcriptUrl })
