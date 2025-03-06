@@ -15,16 +15,17 @@ export class BackgroundService {
         try {
             await ProjectService.updateProjectStatus(projectId, 'IN_PROGRESS')
             await ProjectService.addProjectMetaData({ projectId, ...projectMetaData })
-            const response = await axios.post("http://localhost:3002/process-video", {
+            const response = await axios.post(process.env.VIDEO_PROCESSOR_URL!, {
                 userId, projectId, projectMetaData
             });
-            if (response.status != 200 || response.data.pojectId != projectId || response.data.received != true) {
+
+            if (response.status != 200 || response.data.projectId != projectId || response.data.received != true) {
+                console.log('Failed to initiate background process , marking the project status to FAILED');
                 await ProjectService.updateProjectStatus(projectId, 'FAILED')
             }
-
             return true
         } catch (error) {
-            console.error('Error sending message to kafka:', error);
+            console.error('Failed to initiate background process', error);
             throw new Error('Failed to initiate background process');
         }
     }

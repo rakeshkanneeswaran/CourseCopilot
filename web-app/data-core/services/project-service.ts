@@ -40,7 +40,6 @@ export class ProjectService {
                     status: true
                 }
             })
-            console.log("Projects:", projects);
             return projects;
         } catch (error) {
             throw error;
