@@ -1,0 +1,5 @@
+1. Integrate all supported languages and voices in synthesis_speech.py.
+2. Creating Mini Responses To give updates to server.
+3. Cleaning the Code and Working Directory.
+4. Add silence and speed_rate formula in audio processing.
+5. SoftCoding subtitles.
