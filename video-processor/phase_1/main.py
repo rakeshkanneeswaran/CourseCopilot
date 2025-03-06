@@ -2,6 +2,8 @@ from uuid import uuid4
 import boto3
 from botocore.exceptions import ClientError
 
+import requests
+
 # import magic
 import uvicorn
 from fastapi import (
@@ -193,6 +195,7 @@ async def process_video(
             "projectId": projectId,
             "userId": userId,
             "projectMetaData": projectMetaData,
+            "status": 200,
         }
 
     except Exception as e:
@@ -317,7 +320,13 @@ async def process_video_async(request, project_temp_dir, video_contents):
         # 9. Clean up temporary files
         shutil.rmtree(project_temp_dir)
         shutil.rmtree(OUTPUT_DIRECTORY)
+        data = {"projectId": request.projectId, "status": "Completed"}
 
+        api_url = "http://localhost:3000/api/project/"
+
+        response = requests.post(api_url, json=data)
+        print(response.json())
+        logger.info("Processing completed successfully")
         return {"projectId": request.projectId, "status": "200"}
 
     except Exception as e:
