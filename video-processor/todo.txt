@@ -1,5 +1,5 @@
 1. Integrate all supported languages and voices in synthesis_speech.py.
-2. !st and 2nd response according to ts. add status code in return
+2. 1st and 2nd response according to ts. add status code in return
 3. Cleaning the Code and Working Directory.
 4. Add silence and speed_rate formula in audio processing.
 5. SoftCoding subtitles.

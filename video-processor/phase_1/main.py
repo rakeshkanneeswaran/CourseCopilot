@@ -238,7 +238,7 @@ async def process_video_async(request, project_temp_dir, video_contents):
                 generate_transcript(video_path, transcript_path)
 
                 # Upload transcript to S3
-                transcript_s3_key = f"{request.userId}/{request.projectId}/originial_content/transcripts/{video_name}.json"
+                transcript_s3_key = f"{request.userId}/{request.projectId}/original_content/transcripts/{video_name}.json"
                 upload_to_s3(AWS_BUCKET, transcript_path, transcript_s3_key)
                 result["transcript"] = transcript_s3_key
 
