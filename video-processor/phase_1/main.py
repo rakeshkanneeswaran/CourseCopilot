@@ -307,7 +307,7 @@ async def process_video_async(request, project_temp_dir, video_contents):
 
                     # combine_video_audio(video_path, transcription, output_video_path,subtitle_path,language_code="ta-IN", language_name="ta-IN-Standard-D", ssml_gender="male")
                     combine_video_audio(
-                        video_path, transcription, output_video_path, subtitle_path
+                        video_path, transcription, output_video_path, subtitle_path, language_name=language
                     )
 
                     # 8. Upload final video to S3

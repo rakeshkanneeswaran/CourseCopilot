@@ -34,7 +34,7 @@ export default function App() {
 
   return (
     <Navbar
-      className="bg-[#c05e3c] text-white"
+      className="bg-[#2a2a2b] text-white"
       classNames={{
         item: [
           "flex",
