@@ -181,29 +181,76 @@ def combine_video_audio(
     transcription,
     output_path,
     subtitle_path,
-    language_code="ta-IN",
-    language_name="ta-IN-Standard-D",
-    ssml_gender="male",
+    language_code=None,
+    language_name=None,
+    ssml_gender=None,
 ):
-    """
-    Generate TTS audio, combine it with the video, and optionally add subtitles.
-
-    Args:
-        video_path (str): Path to the input video file.
-        transcription (list): List of transcription segments with text and timestamps.
-        output_path (str): Path to save the final output video.
-        language_code (str): Language code for TTS (e.g., "en-US").
-        language_name (str): Voice name for TTS (e.g., "en-US-Wavenet-D").
-        ssml_gender (str): Gender of the voice ("male" or "female").
-        subtitle_path (str, optional): Path to the subtitle file (SRT format). Defaults to None.
-
-    Returns:
-        str: Path to the final output video.
-    """
+    # Define mappings for languages, their codes, and available voices
+    LANGUAGE_MAPPINGS = {
+        "english": {
+            "code": "en-US",
+            "voices": {
+                "male": "en-US-Neural2-J",
+                "female": "en-US-Neural2-F"
+            }
+        },
+        "french": {
+            "code": "fr-FR",
+            "voices": {
+                "male": "fr-FR-Neural2-D",
+                "female": "fr-FR-Neural2-A"
+            }
+        },
+        "german": {
+            "code": "de-DE",
+            "voices": {
+                "male": "de-DE-Neural2-B",
+                "female": "de-DE-Neural2-C"
+            }
+        },
+        "tamil": {
+            "code": "ta-IN",
+            "voices": {
+                "male": "ta-IN-Standard-D",
+                "female": "ta-IN-Standard-A"
+            }
+        }
+        # Add more languages as needed
+    }
+    
+    # Process language_name from payload (case-insensitive)
+    language = language_name.lower() if language_name else "english"
+    
+    # Get gender from parameter or use default
+    gender = ssml_gender.lower() if ssml_gender else "male"
+    
+    # Determine correct values based on the inputs
+    if language in LANGUAGE_MAPPINGS:
+        language_data = LANGUAGE_MAPPINGS[language]
+        selected_code = language_data["code"]
+        
+        if gender in language_data["voices"]:
+            selected_voice = language_data["voices"][gender]
+        else:
+            # Default to first available voice if gender not found
+            selected_voice = list(language_data["voices"].values())[0]
+    else:
+        # Fallback to default values if language not found
+        selected_code = "en-US"
+        selected_voice = "en-US-Neural2-J"
+    
+    # Now use the dynamically selected values in your function
+    print(f"Processing {language}: using code {selected_code}, voice {selected_voice}")
+    
+    # Rest of your implementation using selected_code and selected_voice
+    # ...
+    
+    # Now use the dynamically selected values in your function
+    # Rest of your implementation...
     try:
         # Generate TTS audio
         audio_path = generate_tts(
-            video_path, language_code, language_name, ssml_gender, transcription
+            video_path, selected_code, selected_voice, gender, transcription
         )
 
         # Prepare FFmpeg command based on whether subtitles are provided
