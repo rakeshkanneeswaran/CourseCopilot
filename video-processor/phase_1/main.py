@@ -218,9 +218,12 @@ async def process_video_async(request, project_temp_dir, video_contents):
         }
         # 3. Process each video
         for video_key in video_contents:
+
             video_name = os.path.basename(video_key["Key"])
             video_path = os.path.join(project_temp_dir, video_name)
-
+            print("-------------------------------------------------------------")
+            print(" Video Path", video_path, "Video Name", video_name)
+            print("-------------------------------------------------------------")
             result = {
                 "userId": request.userId,
                 "projectId": request.projectId,
@@ -320,7 +323,7 @@ async def process_video_async(request, project_temp_dir, video_contents):
         # 9. Clean up temporary files
         shutil.rmtree(project_temp_dir)
         shutil.rmtree(OUTPUT_DIRECTORY)
-        data = {"projectId": request.projectId, "status": "Completed"}
+        data = {"projectId": request.projectId, "status": "COMPLETED"}
 
         api_url = "http://localhost:3000/api/project/"
 
