@@ -63,7 +63,10 @@ export default function Page() {
     if (!userId || !projectId) return;
     const fetchProjects = async () => {
       try {
+        console.log(projectId, userId);
         const content = await getOriginalContent({ userId, projectId });
+        console.log("Content fetched");
+        console.log(content);
         if (content.length) {
           setProjectContent(content);
           setSelectedContent(content[0]);

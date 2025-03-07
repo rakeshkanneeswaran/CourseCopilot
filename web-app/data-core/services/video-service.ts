@@ -34,7 +34,7 @@ export class VideoService {
 
         } catch (error) {
             console.error(error);
-            throw new Error('Failed to upload video');
+            throw new Error('File path or bucket name is missing.');
         }
     }
 }
