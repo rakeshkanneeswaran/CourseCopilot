@@ -129,10 +129,10 @@ export default function VideoUploadPage() {
   };
   return (
     <div>
-      <div className="flex min-h-screen bg-gray-50 p-6 gap-6">
+      <div className="flex min-h-screen bg-[#faf8f4] p-6 gap-6">
         {/* Left Panel - Video Upload */}
 
-        <div className="w-2/3 flex flex-col items-center border-r border-gray-300 p-6 ">
+        <div className="w-2/3 flex flex-col items-center  bg-[#faf8f4] p-6 ">
           <h1 className="text-2xl font-bold text-gray-800 mb-4">
             Upload Your Videos
           </h1>
@@ -140,7 +140,7 @@ export default function VideoUploadPage() {
           <div className="flex items-center justify-center w-full">
             <label
               htmlFor="dropzone-file"
-              className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-200 border-gray-600"
+              className="flex flex-col items-center justify-center w-full h-64 border-2  border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-200 border-gray-600"
             >
               <div className="flex flex-col items-center justify-center pt-5 pb-6">
                 <svg
@@ -177,16 +177,16 @@ export default function VideoUploadPage() {
             </label>
           </div>
 
-          <div className="flex flex-col gap-4 overflow-y-scroll">
+          <div className="flex flex-col gap-4  pt-2 overflow-y-scroll">
             {previewUrls.map((url, index) => (
               <div
                 key={index}
-                className="flex items-center gap-4 bg-gray-100 p-4 rounded-lg shadow-md"
+                className="flex items-center gap-4 bg-[#f0efe7] p-4 rounded-lg shadow-md"
               >
                 <video
                   src={url}
                   controls
-                  className="w-48 h-48 rounded-lg shadow-lg"
+                  className="w-48 h-48 rounded-lg"
                   onLoadedMetadata={(e) => e.currentTarget.pause()}
                   preload="metadata"
                 />
@@ -202,7 +202,7 @@ export default function VideoUploadPage() {
         </div>
 
         {/* Right Panel - Processing Options */}
-        <div className="w-2/3 p-6 flex flex-col space-y-6">
+        <div className="w-2/3 p-6  bg-[#f0efe7]   rounded-lg flex flex-col  space-y-6">
           <h2 className="text-xl font-bold text-gray-800">
             Processing Options
           </h2>
@@ -323,7 +323,7 @@ function Switch({
   return (
     <div
       className={`relative w-12 h-6 flex items-center bg-gray-300 rounded-full p-1 cursor-pointer transition ${
-        enabled ? "bg-red-500" : "bg-gray-300"
+        enabled ? "bg-[#2a2a2b]" : "bg-gray-300"
       }`}
       onClick={() => onChange(!enabled)}
     >
@@ -372,8 +372,8 @@ function Button({
       disabled={disabled}
       className={`px-4 py-2 font-semibold text-white rounded-lg shadow-md transition ${
         disabled
-          ? "bg-gray-400 cursor-not-allowed"
-          : "bg-red-500 hover:bg-red-700"
+          ? "bg-[#2a2a2b] cursor-not-allowed"
+          : "bg-[#2a2a2b] hover:bg-black"
       }`}
     >
       {children}

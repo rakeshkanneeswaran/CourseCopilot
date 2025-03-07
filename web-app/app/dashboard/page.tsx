@@ -56,19 +56,19 @@ const DashboardPage = () => {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Welcome, User {userId}</h1>
         <button
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-slate-700"
+          className="bg-[#2a2a2b] text-white px-4 py-2 rounded-lg shadow-md hover:bg-black"
           onClick={() => router.push(`/create-project`)}
         >
-          Create New Project
+          + Create New Project
         </button>
       </div>
 
       {/* Marketing */}
       <div className="w-full min-h-32 overflow-x-auto bg-gradient-to-r from-[#e9e6dc] via-[#edd7cb] to-[#edd7cb] flex items-center justify-center text-lg font-bold text-gray-800 text-center rounded-lg px-6 leading-snug">
         <span className="text-black text-2xl">
-          Transform Your Courses Instantly. AI-powered translation, auto
-          transcription, smart test generation, and an interactive chatbot for
-          every lecture.
+          Instantly elevate your courses with AI-powered translation,
+          transcription, smart test generation, and an Interactive AI assitant
+          for every course.
         </span>
       </div>
 
