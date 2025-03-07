@@ -52,7 +52,7 @@ const DashboardPage = () => {
   }, [userId]);
 
   return (
-    <div className="min-h-screen bg-white text-black p-6 flex flex-col gap-6">
+    <div className="min-h-screen bg-[#faf8f4] text-black p-6 flex flex-col gap-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Welcome, User {userId}</h1>
         <button
@@ -61,6 +61,15 @@ const DashboardPage = () => {
         >
           Create New Project
         </button>
+      </div>
+
+      {/* Marketing */}
+      <div className="w-full min-h-32 overflow-x-auto bg-gradient-to-r from-[#e9e6dc] via-[#edd7cb] to-[#edd7cb] flex items-center justify-center text-lg font-bold text-gray-800 text-center rounded-lg px-6 leading-snug">
+        <span className="text-black text-2xl">
+          Transform Your Courses Instantly. AI-powered translation, auto
+          transcription, smart test generation, and an interactive chatbot for
+          every lecture.
+        </span>
       </div>
 
       {/* Project Table */}

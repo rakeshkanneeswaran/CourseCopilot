@@ -6,12 +6,12 @@ const checkTopicExists = async (topicName: string) => {
     try {
         const response = await axios.get("http://localhost:3003/health");
         if (response.status === 200) {
-            console.log("✅ Intelligence server is up and running.");
+            console.log("✅ video processor  server is up and running.");
         } else {
-            throw new Error(`❌ Intelligence server responded with status: ${response.status}`);
+            throw new Error(`❌video processor server responded with status: ${response.status}`);
         }
     } catch (error) {
-        throw new Error("❌ Intelligence server is down or unreachable.");
+        throw new Error("❌ video processor server is down or unreachable.");
     }
     const admin = kafka_admin.admin();
     try {

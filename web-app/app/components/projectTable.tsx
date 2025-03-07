@@ -51,7 +51,7 @@ export default function App({
     <Table
       isStriped
       aria-label="Project details table"
-      className="border border-gray-300"
+      className="border bg-[#eceae0]  rounded-2xl"
     >
       <TableHeader>
         <TableColumn className="text-left px-4 py-3 ">Project Name</TableColumn>
@@ -65,10 +65,10 @@ export default function App({
             return (
               <TableRow
                 key={project.id}
-                className="even:bg-gray-100 hover:bg-gray-50 border border-gray-300 transition duration-200 rounded-lg"
+                className="bg-[#f9f8f4] hover:bg-[#fafbf8]  transition duration-200  "
               >
                 <TableCell
-                  className="text-left px-4 py-3 cursor-pointer font-medium hover:underline"
+                  className="text-left px-4 py-3 cursor-pointer font-medium hover:underline rounded-l-2xl "
                   onClick={() => {
                     if (project.status == "NOT_STARTED") {
                       router.push(`/build-project/${project.id}`);
@@ -85,7 +85,7 @@ export default function App({
                 <TableCell className="text-left px-4 py-3">
                   {project.createdAt.toLocaleDateString()}
                 </TableCell>
-                <TableCell className="text-left px-4 py-3">
+                <TableCell className="text-left px-4 py-3 rounded-r-2xl">
                   <span
                     className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium text-white ${color}`}
                   >

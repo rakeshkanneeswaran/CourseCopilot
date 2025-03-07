@@ -26,7 +26,7 @@ export async function initiateBackground({ userId, projectId, projectMetaData }:
         const result = await BackgroundService.initiateBackground({ userId, projectId, projectMetaData })
         return result
     } catch (error) {
-        console.error('Error sending message to kafka:', error);
+        console.error('Failed to initiate background process:', error);
         throw new Error('Failed to initiate background process');
     }
 }

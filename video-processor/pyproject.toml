@@ -19,7 +19,8 @@ dependencies = [
     "pydub (>=0.25.1,<0.26.0)",
     "google-cloud-texttospeech (>=2.25.0,<3.0.0)",
     "vertexai (>=1.71.1,<2.0.0)",
-    "whisper-timestamped (>=1.15.8,<2.0.0)"
+    "whisper-timestamped (>=1.15.8,<2.0.0)",
+    "requests (>=2.32.3,<3.0.0)"
 ]
 
 [tool.poetry]

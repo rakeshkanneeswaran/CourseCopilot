@@ -226,7 +226,7 @@ export default function VideoUploadPage() {
                 Select Languages:
               </h3>
               <div className="grid grid-cols-2 gap-2">
-                {["English", "Spanish", "French", "German"].map((language) => (
+                {["English", "Tamil", "French", "German"].map((language) => (
                   <label key={language} className="flex items-center space-x-2">
                     <input
                       type="checkbox"

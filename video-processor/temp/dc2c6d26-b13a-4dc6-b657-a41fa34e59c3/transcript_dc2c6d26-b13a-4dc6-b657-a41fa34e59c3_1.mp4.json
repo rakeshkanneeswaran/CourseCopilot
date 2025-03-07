@@ -1,0 +1,482 @@
+[
+    {
+        "id": 0,
+        "start_time": "0.00s",
+        "end_time": "4.80s",
+        "text": " Hello everyone. In this video we're going to be talking about the difference between"
+    },
+    {
+        "id": 1,
+        "start_time": "4.80s",
+        "end_time": "10.12s",
+        "text": " public and private IP addresses and to be specific I'm going to be talking about"
+    },
+    {
+        "id": 2,
+        "start_time": "10.12s",
+        "end_time": "16.20s",
+        "text": " IP version 4 addresses. So the first thing we have to know is what is an IP"
+    },
+    {
+        "id": 3,
+        "start_time": "16.20s",
+        "end_time": "21.66s",
+        "text": " address? Well an IP address is a numeric address. It's an identifier for a"
+    },
+    {
+        "id": 4,
+        "start_time": "21.66s",
+        "end_time": "27.12s",
+        "text": " computer or device on a network. Every device has to have an IP address for"
+    },
+    {
+        "id": 5,
+        "start_time": "27.12s",
+        "end_time": "31.64s",
+        "text": " communication purposes and there are two different types of IP addresses."
+    },
+    {
+        "id": 6,
+        "start_time": "31.64s",
+        "end_time": "37.20s",
+        "text": " There's public and private. So what are the differences between the two? So let's"
+    },
+    {
+        "id": 7,
+        "start_time": "37.20s",
+        "end_time": "43.04s",
+        "text": " first talk about public IP addresses. Now when you order internet service from an"
+    },
+    {
+        "id": 8,
+        "start_time": "43.04s",
+        "end_time": "47.60s",
+        "text": " internet service provider they are going to assign your modem or your router in"
+    },
+    {
+        "id": 9,
+        "start_time": "47.60s",
+        "end_time": "53.48s",
+        "text": " your home or business a public IP address. This public IP address is registered"
+    },
+    {
+        "id": 10,
+        "start_time": "53.48s",
+        "end_time": "58.22s",
+        "text": " on the internet. It's what gives you access to the worldwide web. So if you"
+    },
+    {
+        "id": 11,
+        "start_time": "58.22s",
+        "end_time": "63.92s",
+        "text": " don't have a public IP you cannot access the internet. Public IP addresses are"
+    },
+    {
+        "id": 12,
+        "start_time": "63.92s",
+        "end_time": "69.20s",
+        "text": " also unique. There are no duplicates anywhere in the world of public IP"
+    },
+    {
+        "id": 13,
+        "start_time": "69.20s",
+        "end_time": "74.96s",
+        "text": " addresses. Now when IP addresses were created engineers didn't realize how big"
+    },
+    {
+        "id": 14,
+        "start_time": "74.96s",
+        "end_time": "79.94s",
+        "text": " the internet would become because even though there are over four billion IP"
+    },
+    {
+        "id": 15,
+        "start_time": "79.94s",
+        "end_time": "84.02s",
+        "text": " version for addresses available the engineers thought that this would be"
+    },
+    {
+        "id": 16,
+        "start_time": "84.02s",
+        "end_time": "88.98s",
+        "text": " enough but they were obviously wrong because of the explosive growth of the"
+    },
+    {
+        "id": 17,
+        "start_time": "88.98s",
+        "end_time": "94.94s",
+        "text": " internet. So in order to prevent a shortage of public IP version for addresses"
+    },
+    {
+        "id": 18,
+        "start_time": "94.94s",
+        "end_time": "101.50s",
+        "text": " engineers developed private IP addresses. Now private IP addresses are not"
+    },
+    {
+        "id": 19,
+        "start_time": "101.50s",
+        "end_time": "106.90s",
+        "text": " publicly registered on the internet. So you can access the internet using a"
+    },
+    {
+        "id": 20,
+        "start_time": "106.90s",
+        "end_time": "112.70s",
+        "text": " private IP address. However if your device does have a private IP address and"
+    },
+    {
+        "id": 21,
+        "start_time": "112.70s",
+        "end_time": "117.70s",
+        "text": " you want to access the internet your private IP has to be converted into a"
+    },
+    {
+        "id": 22,
+        "start_time": "117.70s",
+        "end_time": "123.66s",
+        "text": " public IP address before you can access the internet. And this is because private"
+    },
+    {
+        "id": 23,
+        "start_time": "123.66s",
+        "end_time": "129.62s",
+        "text": " IP addresses are only used internally such as inside a home or a business. They"
+    },
+    {
+        "id": 24,
+        "start_time": "129.62s",
+        "end_time": "134.70s",
+        "text": " are not used out on the public internet and a service that's inside your router"
+    },
+    {
+        "id": 25,
+        "start_time": "134.70s",
+        "end_time": "143.18s",
+        "text": " called DHCP is what assigns your internal devices a private IP. So as an"
+    },
+    {
+        "id": 26,
+        "start_time": "143.18s",
+        "end_time": "147.30s",
+        "text": " example most homes and businesses are not going to have just one device that"
+    },
+    {
+        "id": 27,
+        "start_time": "147.30s",
+        "end_time": "151.14s",
+        "text": " needs access to the internet. Chances are they're going to have multiple"
+    },
+    {
+        "id": 28,
+        "start_time": "151.14s",
+        "end_time": "156.38s",
+        "text": " devices that need internet access. So all of those devices need a public IP"
+    },
+    {
+        "id": 29,
+        "start_time": "156.38s",
+        "end_time": "161.42s",
+        "text": " address if they want to access the internet. Now you could contact your ISP and"
+    },
+    {
+        "id": 30,
+        "start_time": "161.42s",
+        "end_time": "166.42s",
+        "text": " ask them for these additional IP addresses for all of your devices. But that's"
+    },
+    {
+        "id": 31,
+        "start_time": "166.42s",
+        "end_time": "171.22s",
+        "text": " going to be more expensive, unnecessary and more importantly it'll be a waste"
+    },
+    {
+        "id": 32,
+        "start_time": "171.22s",
+        "end_time": "176.62s",
+        "text": " of public IP addresses. And let's face it if every device in the world had their"
+    },
+    {
+        "id": 33,
+        "start_time": "176.62s",
+        "end_time": "182.34s",
+        "text": " own public IP address we would have run out of public IP addresses already. So"
+    },
+    {
+        "id": 34,
+        "start_time": "182.34s",
+        "end_time": "187.38s",
+        "text": " what we can do instead is we can have the router assign the devices inside our"
+    },
+    {
+        "id": 35,
+        "start_time": "187.38s",
+        "end_time": "193.06s",
+        "text": " home or business private IP addresses. And when these devices need to access"
+    },
+    {
+        "id": 36,
+        "start_time": "193.06s",
+        "end_time": "198.66s",
+        "text": " the internet their private IP address will be translated to the one public IP"
+    },
+    {
+        "id": 37,
+        "start_time": "198.66s",
+        "end_time": "203.42s",
+        "text": " address that we have been given. And the service that translates this is called"
+    },
+    {
+        "id": 38,
+        "start_time": "203.42s",
+        "end_time": "208.42s",
+        "text": " NAT or network address translation. And it's a service that's built into our"
+    },
+    {
+        "id": 39,
+        "start_time": "208.42s",
+        "end_time": "213.70s",
+        "text": " router. So not only does it translate private to public but it also translates"
+    },
+    {
+        "id": 40,
+        "start_time": "213.70s",
+        "end_time": "218.50s",
+        "text": " public to private because if a computer on the internet wants to communicate"
+    },
+    {
+        "id": 41,
+        "start_time": "218.50s",
+        "end_time": "223.22s",
+        "text": " with a computer on this private network the public IP address needs to be"
+    },
+    {
+        "id": 42,
+        "start_time": "223.22s",
+        "end_time": "230.78s",
+        "text": " translated by NAT to the private IP address for that computer. Now private IP"
+    },
+    {
+        "id": 43,
+        "start_time": "230.78s",
+        "end_time": "235.10s",
+        "text": " addresses have three different classes and these classes have different ranges."
+    },
+    {
+        "id": 44,
+        "start_time": "235.10s",
+        "end_time": "240.74s",
+        "text": " So a class A private IP starts with the number 10. This class is typically used"
+    },
+    {
+        "id": 45,
+        "start_time": "240.74s",
+        "end_time": "246.50s",
+        "text": " for large organizations. Class B starts with 172. This is typically used in"
+    },
+    {
+        "id": 46,
+        "start_time": "246.50s",
+        "end_time": "252.54s",
+        "text": " medium sized organizations. And class C will start with 192. This is used in small"
+    },
+    {
+        "id": 47,
+        "start_time": "252.54s",
+        "end_time": "258.58s",
+        "text": " organizations or homes. Class C is the most popular range of private IP addresses"
+    },
+    {
+        "id": 48,
+        "start_time": "258.58s",
+        "end_time": "262.90s",
+        "text": " that's used. So don't be surprised if you happen to check your IP addresses on"
+    },
+    {
+        "id": 49,
+        "start_time": "262.90s",
+        "end_time": "268.74s",
+        "text": " your devices in your home if you see them starting with 192.168. Because like I"
+    },
+    {
+        "id": 50,
+        "start_time": "268.74s",
+        "end_time": "274.14s",
+        "text": " said it's the class that's mostly used. Now if you want to find out what your"
+    },
+    {
+        "id": 51,
+        "start_time": "274.14s",
+        "end_time": "279.22s",
+        "text": " IP address is this is how you do it. If you're using a Windows computer you just"
+    },
+    {
+        "id": 52,
+        "start_time": "279.22s",
+        "end_time": "285.26s",
+        "text": " open up a command prompt and type IP config. On Mac and Linux computers you just"
+    },
+    {
+        "id": 53,
+        "start_time": "285.26s",
+        "end_time": "290.58s",
+        "text": " open up a terminal and type if config. So here is the IP address for this"
+    },
+    {
+        "id": 54,
+        "start_time": "290.58s",
+        "end_time": "295.78s",
+        "text": " computer. And as you can see this is a class C private IP address that has been"
+    },
+    {
+        "id": 55,
+        "start_time": "295.78s",
+        "end_time": "301.98s",
+        "text": " given to us by our router. So since this computer is assigned a private IP it's"
+    },
+    {
+        "id": 56,
+        "start_time": "301.98s",
+        "end_time": "306.98s",
+        "text": " not going to show our public IP. But if you want to know what your public IP"
+    },
+    {
+        "id": 57,
+        "start_time": "306.98s",
+        "end_time": "311.82s",
+        "text": " address is you just open up a web browser and then you will go to a website like"
+    },
+    {
+        "id": 58,
+        "start_time": "311.82s",
+        "end_time": "319.02s",
+        "text": " what's my IP address.com and that web page will show you your public IP address."
+    },
+    {
+        "id": 59,
+        "start_time": "319.02s",
+        "end_time": "325.42s",
+        "text": " So to summarize public IP addresses are unique. While private IP addresses are"
+    },
+    {
+        "id": 60,
+        "start_time": "325.42s",
+        "end_time": "330.94s",
+        "text": " non-unique because the same private IP addresses can be used in other private"
+    },
+    {
+        "id": 61,
+        "start_time": "330.94s",
+        "end_time": "336.46s",
+        "text": " networks. Public IPs are publicly registered so they are able to access the"
+    },
+    {
+        "id": 62,
+        "start_time": "336.46s",
+        "end_time": "341.94s",
+        "text": " internet while private IPs are not publicly registered so they cannot access"
+    },
+    {
+        "id": 63,
+        "start_time": "341.94s",
+        "end_time": "347.14s",
+        "text": " the internet directly. Public IPs are used externally on the internet while"
+    },
+    {
+        "id": 64,
+        "start_time": "347.14s",
+        "end_time": "353.62s",
+        "text": " private IPs are used internally on local networks. Public IPs are assigned by"
+    },
+    {
+        "id": 65,
+        "start_time": "353.62s",
+        "end_time": "358.66s",
+        "text": " your internet service provider while private IPs are assigned by your router."
+    },
+    {
+        "id": 66,
+        "start_time": "358.66s",
+        "end_time": "364.82s",
+        "text": " Public IPs are not free you have to pay for them but private IPs are free. And"
+    },
+    {
+        "id": 67,
+        "start_time": "364.82s",
+        "end_time": "369.54s",
+        "text": " as far as security public IPs are not secure because they are used"
+    },
+    {
+        "id": 68,
+        "start_time": "369.54s",
+        "end_time": "374.54s",
+        "text": " externally out on the internet so they are traceable. So in order to make a"
+    },
+    {
+        "id": 69,
+        "start_time": "374.54s",
+        "end_time": "379.82s",
+        "text": " public IP more secure you have to add security measures such as using a proxy"
+    },
+    {
+        "id": 70,
+        "start_time": "379.82s",
+        "end_time": "385.42s",
+        "text": " or VPN which hides your public IP address. But private IP addresses are more"
+    },
+    {
+        "id": 71,
+        "start_time": "385.42s",
+        "end_time": "389.42s",
+        "text": " secure because they are hidden from the internet. They cannot be traced"
+    },
+    {
+        "id": 72,
+        "start_time": "389.42s",
+        "end_time": "395.06s",
+        "text": " outside of their own network because they are used internally. Now even though"
+    },
+    {
+        "id": 73,
+        "start_time": "395.06s",
+        "end_time": "400.70s",
+        "text": " private IPs are used internally they still have to be translated to a public"
+    },
+    {
+        "id": 74,
+        "start_time": "400.70s",
+        "end_time": "405.50s",
+        "text": " IP when you want to go on the internet which means your public IP is exposed"
+    },
+    {
+        "id": 75,
+        "start_time": "405.50s",
+        "end_time": "410.14s",
+        "text": " on the internet. So if you want to serve the internet with privacy and security"
+    },
+    {
+        "id": 76,
+        "start_time": "410.14s",
+        "end_time": "415.30s",
+        "text": " you need to use a VPN and there's a link in the description below of the VPN"
+    },
+    {
+        "id": 77,
+        "start_time": "415.30s",
+        "end_time": "419.70s",
+        "text": " that I personally use. So I want to thank you for watching this video on the"
+    },
+    {
+        "id": 78,
+        "start_time": "419.70s",
+        "end_time": "424.74s",
+        "text": " difference between public and private IP addresses. Please subscribe and thank"
+    },
+    {
+        "id": 79,
+        "start_time": "424.74s",
+        "end_time": "427.22s",
+        "text": " you for watching."
+    }
+]
