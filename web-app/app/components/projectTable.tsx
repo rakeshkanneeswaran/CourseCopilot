@@ -1,4 +1,5 @@
 "use client";
+import { deleteProject } from "./action";
 
 import { useRouter } from "next/navigation";
 import {
@@ -57,6 +58,7 @@ export default function App({
         <TableColumn className="text-left px-4 py-3 ">Project Name</TableColumn>
         <TableColumn className="text-left px-4 py-3 ">Created At</TableColumn>
         <TableColumn className="text-left px-4 py-3">Status</TableColumn>
+        <TableColumn className="text-left px-4 py-3">Actions</TableColumn>
       </TableHeader>
       <TableBody>
         {projectDetails.length > 0 ? (
@@ -93,6 +95,24 @@ export default function App({
                     {text}
                   </span>
                 </TableCell>
+                <TableCell className="text-left px-4 py-3 rounded-r-2xl">
+                  <button
+                    className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium text-white bg-red-500`}
+                    onClick={async () => {
+                      try {
+                        await deleteProject({
+                          userId: project.userId,
+                          projectId: project.id,
+                        });
+                        window.location.reload();
+                      } catch (error) {
+                        console.error(error);
+                      }
+                    }}
+                  >
+                    Delete Project
+                  </button>
+                </TableCell>
               </TableRow>
             );
           })
@@ -101,6 +121,7 @@ export default function App({
             <TableCell className="text-left px-4 py-3" colSpan={3}>
               No projects available
             </TableCell>
+            <TableCell>&nbsp;</TableCell>
             <TableCell>&nbsp;</TableCell>
             <TableCell>&nbsp;</TableCell>
           </TableRow>
