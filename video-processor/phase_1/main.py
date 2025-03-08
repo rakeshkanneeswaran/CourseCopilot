@@ -322,7 +322,7 @@ async def process_video_async(request, project_temp_dir, video_contents):
 
         # 9. Clean up temporary files
         shutil.rmtree(project_temp_dir)
-        shutil.rmtree(OUTPUT_DIRECTORY)
+        
         data = {"projectId": request.projectId, "status": "COMPLETED"}
 
         api_url = "http://localhost:3000/api/project/"
