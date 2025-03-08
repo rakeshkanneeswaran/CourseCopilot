@@ -109,7 +109,7 @@ export class ProjectService {
                 });
 
 
-                await tx.projectMetaData.delete({
+                await tx.projectMetaData.deleteMany({
                     where: { projectId }
                 })
 

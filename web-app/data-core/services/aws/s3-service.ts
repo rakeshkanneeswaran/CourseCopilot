@@ -43,8 +43,8 @@ export class S3Service {
                 }
             };
         } catch (error) {
-            console.error("S3 Upload Error:", error, { bucket });
-            throw error
+            console.error(error);
+            throw new Error('Failed to upload video file to S3');
         }
     }
 
