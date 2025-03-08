@@ -60,6 +60,7 @@ def synthesize_speech(text, output_filename, language_code, language_name, ssml_
 def generate_tts(video_path, language_code, language_name, ssml_gender, transcription):
     try:
         video_clip = VideoFileClip(video_path)
+        video_duration = video_clip.duration
         video_clip.close()
 
         final_audio = AudioSegment.silent(duration=0)
@@ -91,19 +92,31 @@ def generate_tts(video_path, language_code, language_name, ssml_gender, transcri
         for temp_file in temp_files:
             current_segment = AudioSegment.from_file(temp_file)
             final_audio += current_segment
+        audio_duration = len(final_audio) / 1000
+        speed_factor = video_duration / audio_duration
+        print(f"Speed factor: {speed_factor}")
 
-        # Export the final combined audio
-        final_output_path = os.path.join(
+        # Adjust the speed of the audio to match the video duration
+        final_audio = final_audio.speedup(playback_speed=speed_factor)
+
+        # Export the adjusted audio
+        adjusted_audio_path = os.path.join(
             os.path.dirname(video_path), "final_output.mp3"
         )
-        final_audio.export(final_output_path, format="mp3")
-        print(f"Final audio saved to {final_output_path}")
+        final_audio.export(adjusted_audio_path, format="mp3")
+        print(f"Adjusted audio saved to {adjusted_audio_path}")
+        # Export the final combined audio
+        # final_output_path = os.path.join(
+        #     os.path.dirname(video_path), "final_output.mp3"
+        # )
+        # final_audio.export(final_output_path, format="mp3")
+        # print(f"Final audio saved to {final_output_path}")
 
         # Clean up temporary files
         for temp_file in temp_files:
             os.remove(temp_file)
 
-        return final_output_path
+        return adjusted_audio_path
 
     except Exception as e:
         print(f"Error generating TTS: {str(e)}")
@@ -252,6 +265,8 @@ def combine_video_audio(
         audio_path = generate_tts(
             video_path, selected_code, selected_voice, gender, transcription
         )
+        # Calculate the speed factor to match audio duration to video duration
+
 
         # Prepare FFmpeg command based on whether subtitles are provided
         if subtitle_path:
