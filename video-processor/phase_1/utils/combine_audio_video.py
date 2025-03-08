@@ -60,6 +60,7 @@ def synthesize_speech(text, output_filename, language_code, language_name, ssml_
 def generate_tts(video_path, language_code, language_name, ssml_gender, transcription):
     try:
         video_clip = VideoFileClip(video_path)
+        video_duration = video_clip.duration
         video_clip.close()
 
         final_audio = AudioSegment.silent(duration=0)
@@ -91,7 +92,11 @@ def generate_tts(video_path, language_code, language_name, ssml_gender, transcri
         for temp_file in temp_files:
             current_segment = AudioSegment.from_file(temp_file)
             final_audio += current_segment
-
+        audio_duration = len(final_audio) / 1000
+        speed_factor = video_duration / audio_duration
+        print(f"Speed Factor : {speed_factor} and Video : {video_duration} and Audio : {audio_duration}" )
+        
+        final_audio = final_audio.speedup(playback_speed = speed_factor)
         # Export the final combined audio
         final_output_path = os.path.join(
             os.path.dirname(video_path), "final_output.mp3"
