@@ -8,11 +8,14 @@ from vertexai.generative_models import (
     HarmCategory,
 )
 from loguru import logger
-
+from dotenv import load_dotenv
 # Constants
-PROJECT_ID = "gen-lang-client-0666499294"
-LOCATION = "us-central1"
-MODEL_ID = "gemini-1.5-flash-002"
+
+load_dotenv()
+
+PROJECT_ID = os.getenv("PROJECT_ID")
+LOCATION = os.getenv("LOCATION")
+MODEL_ID = os.getenv("MODEL_ID")
 
 def init_vertex_ai():
     """Initialize Vertex AI with project and location settings."""
