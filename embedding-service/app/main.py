@@ -1,5 +1,6 @@
-from services.s3_service import download_file_from_s3
 from services.embedding_service import EmbeddingService
+from services.s3_service import S3Service
+from services.file_service import FileService
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 import uvicorn
@@ -17,19 +18,16 @@ async def main(request: Request):
     data = await request.json()
     userId = data["userId"]
     projectId = data["projectId"]
-
-    download_file_from_s3(userId, projectId)
-
-
-@app.post("/create/vectorstore/")
-async def createVectorStore(request: Request):
-    print("Request received")
-    data = await request.json()
-    userId = data["userId"]
-    projectId = data["projectId"]
-    texts = data["texts"]
-    vector = EmbeddingService.createVectorStore([texts])
-    EmbeddingService.saveVectorStore(vector, f"vectorstore/{userId}/{projectId}/")
+    local_file_path = S3Service.download_file_from_s3(userId, projectId)
+    print("creating and traforminig")
+    texts = EmbeddingService.load_json_file_and_transform(local_file_path)
+    print(texts)
+    vector_store = EmbeddingService.createVectorStore(texts)
+    EmbeddingService.saveVectorStore(vector_store, f"vectorstore/{userId}/{projectId}/")
+    s3_prefix = f"{userId}/{projectId}/original_content/vectorestore"
+    S3Service.save_vectorstore_to_s3(f"vectorstore/{userId}/{projectId}/", s3_prefix)
+    FileService.delete_transcript_directory(userId, projectId)
+    return {"message": texts}
 
 
 if __name__ == "__main__":
