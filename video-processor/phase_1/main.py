@@ -322,6 +322,16 @@ async def process_video_async(request, project_temp_dir, video_contents):
 
         # 9. Clean up temporary files
         shutil.rmtree(project_temp_dir)
+        # Delete output files in OUTPUT_DIRECTORY but keep the folder
+        for filename in os.listdir(OUTPUT_DIRECTORY):
+            file_path = os.path.join(OUTPUT_DIRECTORY, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                logger.error(f"Failed to delete {file_path}. Reason: {str(e)}")
         
         data = {"projectId": request.projectId, "status": "COMPLETED"}
 
