@@ -25,7 +25,8 @@ export class BackgroundService {
             }
             return true
         } catch (error) {
-            console.error('Failed to initiate background process', error);
+            console.log('Failed to initiate background process', error);
+            await ProjectService.deleteProject({ userId, projectId })
             throw new Error('Failed to initiate background process');
         }
     }
