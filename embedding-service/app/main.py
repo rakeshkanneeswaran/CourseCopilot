@@ -12,7 +12,7 @@ load_dotenv()
 app = FastAPI()
 
 
-@app.post("/items/")
+@app.post("/create/vectorstore/")
 async def main(request: Request):
     print("Request received")
     data = await request.json()
