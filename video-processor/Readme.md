@@ -47,7 +47,32 @@ Copy the path and use it to activate the virtual environment:
 source <path_to_virtual_environment>/bin/activate
 ```
 
-### 4. Set Up Environment Variables
+### 3. Setup Google Application Default Credentials
+
+To configure ADC with a Google Account, you use the Google Cloud CLI:
+
+Install the Google Cloud CLI, then initialize it by running the following command:
+
+```bash
+gcloud init
+```
+
+If you're using a local shell, then create local authentication credentials for your user account:
+
+```bash
+gcloud auth application-default login
+```
+
+Additionally, enable the required Google Cloud APIs:
+
+```bash
+gcloud services enable texttospeech.googleapis.com
+gcloud services enable aiplatform.googleapis.com
+gcloud services enable compute.googleapis.com
+```
+
+
+### 5. Set Up Environment Variables
 
 Create a `.env` file in the `video-processor` directory and add the following environment variables:
 
@@ -55,9 +80,10 @@ Create a `.env` file in the `video-processor` directory and add the following en
 GOOGLE_APPLICATION_CREDENTIALS=<path_to_google_credentials_json>
 AWS_ACCESS_KEY_ID=<your_aws_access_key_id>
 AWS_SECRET_ACCESS_KEY=<your_aws_secret_access_key>
+REGION_NAME=<preferred_region_name>
 ```
 
-### 5. Run the Application
+### 6. Run the Application
 
 Start the FastAPI application:
 
