@@ -47,20 +47,50 @@ export default function VideoUploadPage() {
   };
 
   const handleUpload = async () => {
-    if (videoFiles.length === 0) {
-      alert("Please select at least one video first!");
-      return;
-    }
+    try {
+      if (videoFiles.length === 0) {
+        alert("Please select at least one video first!");
+        return;
+      }
 
-    setUploading(true);
-    setProcessing(true); // Start processing
-    setProgressValue(0); // Reset progress value
+      setUploading(true);
+      setProcessing(true); // Start processing
+      setProgressValue(0); // Reset progress value
 
-    const totalVideos = videoFiles.length;
-    const progressIncrement = 100 / totalVideos;
+      const totalVideos = videoFiles.length;
+      const progressIncrement = 100 / totalVideos;
 
-    let position = 0;
-    for (const videoFile of videoFiles) {
+      let position = 0;
+      for (const videoFile of videoFiles) {
+        if (
+          !projectId ||
+          !userId ||
+          Array.isArray(projectId) ||
+          Array.isArray(userId)
+        ) {
+          return;
+        }
+        position = position + 1;
+        const newFileName = `${projectId}_${position}.mp4`;
+        const renamedFile = new File([videoFile], newFileName, {
+          type: videoFile.type,
+        });
+        const formData = new FormData();
+        formData.append("file", renamedFile);
+        await uploadVideo(formData, { userId, projectId }, position);
+
+        // Update progress value
+        setProgressValue((prev) => prev + progressIncrement);
+      }
+
+      const projectMetaData = {
+        generate_translate: translate,
+        generate_subtitle: includeSubtitles,
+        languages: selectedLanguages,
+        generate_transcript: generateTranscript,
+        gender,
+      };
+
       if (
         !projectId ||
         !userId ||
@@ -69,56 +99,34 @@ export default function VideoUploadPage() {
       ) {
         return;
       }
-      position = position + 1;
-      const newFileName = `${projectId}_${position}.mp4`;
-      const renamedFile = new File([videoFile], newFileName, {
-        type: videoFile.type,
+
+      const result = await initiateBackground({
+        userId,
+        projectId,
+        projectMetaData,
       });
-      const formData = new FormData();
-      formData.append("file", renamedFile);
-      await uploadVideo(formData, { userId, projectId }, position);
 
-      // Update progress value
-      setProgressValue((prev) => prev + progressIncrement);
+      if (!result) {
+        alert("Failed to initiate background process");
+        return;
+      }
+
+      const delay = (ms: number) =>
+        new Promise((resolve) => setTimeout(resolve, ms));
+      await delay(3000);
+      alert(
+        "Videos uploaded successfully! , You will be notified when the processing is complete. or you can check the status in the dashboard"
+      );
+      setProcessing(false);
+      setUploading(false);
+      router.push(`/dashboard`);
+    } catch (error) {
+      console.error("Error uploading video", error);
+      alert("Error uploading video . please try to recreate the project");
+      router.push(`/dashboard`);
+      setUploading(false);
+      setProcessing(false);
     }
-
-    const projectMetaData = {
-      generate_translate: translate,
-      generate_subtitle: includeSubtitles,
-      languages: selectedLanguages,
-      generate_transcript: generateTranscript,
-      gender,
-    };
-
-    if (
-      !projectId ||
-      !userId ||
-      Array.isArray(projectId) ||
-      Array.isArray(userId)
-    ) {
-      return;
-    }
-
-    const result = await initiateBackground({
-      userId,
-      projectId,
-      projectMetaData,
-    });
-
-    if (!result) {
-      alert("Failed to initiate background process");
-      return;
-    }
-
-    const delay = (ms: number) =>
-      new Promise((resolve) => setTimeout(resolve, ms));
-    await delay(3000);
-    alert(
-      "Videos uploaded successfully! , You will be notified when the processing is complete. or you can check the status in the dashboard"
-    );
-    setProcessing(false);
-    setUploading(false);
-    router.push(`/dashboard`);
   };
   const handleLanguageChange = (language: string) => {
     setSelectedLanguages((prev) =>

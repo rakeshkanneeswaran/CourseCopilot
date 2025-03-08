@@ -109,7 +109,7 @@ export class ProjectService {
                 });
 
 
-                await tx.projectMetaData.delete({
+                await tx.projectMetaData.deleteMany({
                     where: { projectId }
                 })
 
@@ -198,6 +198,8 @@ export class ProjectService {
     static async getProjectOriginalContent({ projectId, userId }: { projectId: string, userId: string }) {
 
         try {
+
+            console.log("this is project id", projectId)
             const projectDetails = await prismaClient.project.findFirst({
                 where: { id: projectId, userId: userId },
                 select: {
@@ -207,6 +209,9 @@ export class ProjectService {
                     }
                 }
             })
+
+            console.log("this is project details")
+            console.log(projectDetails)
 
             const videoTranscriptMap: VideoTranscriptMap[] = []
 
@@ -222,6 +227,8 @@ export class ProjectService {
                 videoTranscriptMap.push({ videoUrl, transcriptUrl })
 
             }
+            console.log("this is videoTranscriptMap")
+            console.log(videoTranscriptMap)
             return videoTranscriptMap;
         } catch (error) {
             console.error('Error fetching project original content from S3:', error);

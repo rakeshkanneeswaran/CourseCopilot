@@ -56,10 +56,12 @@ model Video {
 }
 
 model VideoMetadata {
-  id         String @id @default(uuid())
-  keyName    String
-  bucketName String
-  videoId    String @unique
-  fileName   String
-  video      Video  @relation(fields: [videoId], references: [id])
+  id               String  @id @default(uuid())
+  keyName          String
+  bucketName       String
+  videoId          String  @unique
+  fileName         String
+  video            Video   @relation(fields: [videoId], references: [id])
+  videoName        String?
+  videoDescription String?
 }

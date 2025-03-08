@@ -197,15 +197,15 @@ def combine_video_audio(
         "french": {
             "code": "fr-FR",
             "voices": {
-                "male": "fr-FR-Neural2-D",
-                "female": "fr-FR-Neural2-A"
+                "male": "fr-FR-Standard-D   ",
+                "female": "fr-FR-Standard-C"
             }
         },
         "german": {
             "code": "de-DE",
             "voices": {
-                "male": "de-DE-Neural2-B",
-                "female": "de-DE-Neural2-C"
+                "male": "de-DE-Standard-G",
+                "female": "de-DE-Standard-D"
             }
         },
         "tamil": {

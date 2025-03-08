@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     try {
         const data: RequestBody = await req.json();
 
-        if (!data.projectId || data.status != "200") {
+        if (!data.projectId) {
             return NextResponse.json({ error: 'Missing projectId or status' }, { status: 400 });
         }
 
