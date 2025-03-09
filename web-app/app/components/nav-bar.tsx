@@ -34,7 +34,7 @@ export default function App() {
 
   return (
     <Navbar
-      className="bg-[#2a2a2b] text-white"
+      className="bg-[#000000] p-2 text-white"
       classNames={{
         item: [
           "flex",
@@ -58,7 +58,7 @@ export default function App() {
       </NavbarBrand>
       <NavbarContent className="hidden sm:flex gap-4" justify="center">
         <NavbarItem>
-          <Link color="foreground" href="/dashboard" className="text-white">
+          <Link color="foreground" href="/dashboard" className="">
             Dashboard
           </Link>
         </NavbarItem>
@@ -72,14 +72,14 @@ export default function App() {
                 setToken(null); // Update state after logout
                 window.location.href = "";
               }}
-              className="text-white"
+              className=""
             >
               Logout
             </Button>
           </NavbarItem>
         ) : (
           <NavbarItem>
-            <Link href="/login-page" className="text-white">
+            <Link href="/login-page" className="">
               Login
             </Link>
           </NavbarItem>

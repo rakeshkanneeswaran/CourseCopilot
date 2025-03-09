@@ -38,6 +38,37 @@ export default function Page() {
   const [selectedLanguage, setSelectedLanguage] = useState<string>("Original");
   const [availableLanguage, setAvailableLanguage] = useState<string[]>([]);
   const [showOptions, setShowOptions] = useState(false);
+  const [messageFromIntellignece, setMessageFromIntellignece] =
+    useState<string[]>();
+  const [ws, setWs] = useState<WebSocket | null>(null);
+  const [inputValue, setInputValue] = useState("");
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (ws) {
+      ws.send(inputValue);
+    }
+    setInputValue("");
+  };
+
+  useEffect(() => {
+    const socket = new WebSocket(
+      "ws://localhost:3003/ws/c75bbcd5-0c3c-4818-a7b4-a5d0b7f8d268/e364401a-2a65-44fe-9322-0140cc1eaeef"
+    );
+    socket.onopen = () => {
+      console.log("Connected to server");
+    };
+    socket.onmessage = (message) => {
+      const data = JSON.parse(message.data);
+      setMessageFromIntellignece((prev) => {
+        return [...(prev || []), data.text];
+      });
+    };
+    setWs(socket);
+    return () => {
+      socket.close();
+    };
+  }, []);
 
   useEffect(() => {
     const fetchProjectDetails = async () => {
@@ -121,7 +152,7 @@ export default function Page() {
   }, [selectedContent]);
 
   return (
-    <div className="w-screen h-screen bg-[#faf8f4] flex flex-col items-center p-6 fixed overflow-hidden">
+    <div className="w-screen h-screen bg-[#faf8f4] flex flex-col items-center p-6  overflow-y-auto">
       {/* Main Content Area */}
       <div className="flex w-full px-20 space-x-6">
         {/* Left Side (Video + Transcript) */}
@@ -150,9 +181,38 @@ export default function Page() {
           </div>
         </div>
 
-        {/* Right Side (Empty for Future Content) */}
-        <div className="w-1/3 bg-[#f5f3eb] rounded-lg shadow-lg flex items-center justify-center">
-          <p className="text-gray-400 italic">Future content will be here</p>
+        {/* Right Side (AI chatboth) */}
+        <div className="w-1/3 bg-[#f5f3eb] rounded-lg shadow-lg flex flex-col p-4">
+          <p className="text-gray-400 italic text-center">Ask your doubt</p>
+
+          {/* Messages appear from the top with spacing */}
+          <div className="w-full h-72 p-2 text-black rounded-lg overflow-y-auto flex flex-col space-y-2">
+            {messageFromIntellignece?.map((message, index) => (
+              <p key={index} className="p-2 bg-[#e7e5db] rounded-md shadow-sm">
+                {message}
+              </p>
+            ))}
+          </div>
+
+          {/* Input box at the bottom */}
+          <form
+            onSubmit={handleSubmit}
+            className="w-full flex flex-col items-center pt-64 gap-2 mt-2"
+          >
+            <input
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              className="border border-gray-300 text-black rounded px-3 py-2 w-full"
+              placeholder="Enter something"
+            />
+            <button
+              type="submit"
+              className="bg-[#c05e3c] hover:bg-[#a04d30] text-white px-4 py-2 rounded "
+            >
+              Submit
+            </button>
+          </form>
         </div>
       </div>
 
