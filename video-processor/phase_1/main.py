@@ -1,7 +1,7 @@
 from uuid import uuid4
 import boto3
 from botocore.exceptions import ClientError
-
+from dotenv import load_dotenv
 import requests
 
 # import magic
@@ -32,21 +32,22 @@ from utils.combine_audio_video import combine_video_audio
 from utils.generate_srt import generate_srt  # Assuming this function exists
 import json
 
-# load_dotenv()
+load_dotenv()
 # AWS Credentials
 session = boto3.Session(
-    aws_access_key_id="AKIAZOZQFQWQYVUHJSVG",
-    aws_secret_access_key="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",
-    region_name="ap-south-1",
+    aws_access_key_id=os.getenv("aws_access_key_id"),
+    aws_secret_access_key=os.getenv("aws_secret_access_key"),
+    region_name=os.getenv("region_name"),
 )
 
 # Constants
 KB = 1024
 MB = 1024 * KB
-AWS_BUCKET = "eduverseai-production"
-S3_DIRECTORY = "original_content/videos/"
-OUTPUT_DIRECTORY = "outputs/"
-TEMP_DIRECTORY = "temp/"
+AWS_BUCKET = os.getenv("AWS_BUCKET")
+S3_DIRECTORY = os.getenv("S3_DIRECTORY")
+OUTPUT_DIRECTORY = os.getenv("OUTPUT_DIRECTORY")
+TEMP_DIRECTORY = os.getenv("TEMP_DIRECTORY")
+PORT = os.getenv("PORT")
 
 s3_client = session.client("s3")
 

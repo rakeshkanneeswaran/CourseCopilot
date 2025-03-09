@@ -94,13 +94,11 @@ def generate_tts(video_path, language_code, language_name, ssml_gender, transcri
             final_audio += current_segment
         audio_duration = len(final_audio) / 1000
         speed_factor = video_duration / audio_duration
-        print(f"Speed factor: {speed_factor}")
-
-        # Adjust the speed of the audio to match the video duration
-        final_audio = final_audio.speedup(playback_speed=speed_factor)
-
-        # Export the adjusted audio
-        adjusted_audio_path = os.path.join(
+        print(f"Speed Factor : {speed_factor} and Video : {video_duration} and Audio : {audio_duration}" )
+        
+        final_audio = final_audio.speedup(playback_speed = speed_factor)
+        # Export the final combined audio
+        final_output_path = os.path.join(
             os.path.dirname(video_path), "final_output.mp3"
         )
         final_audio.export(adjusted_audio_path, format="mp3")
