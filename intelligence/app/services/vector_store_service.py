@@ -14,6 +14,12 @@ class VectorStoreService:
 
     @staticmethod
     def retrieveText(vectorstore, query):
-        retriever = vectorstore.as_retriever()
+        retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
         retrieved_documents = retriever.invoke(query)
-        return retrieved_documents[0].page_content
+        if len(retrieved_documents) == 0:
+            return "No context found."
+        docArray = []
+
+        for doc in retrieved_documents:
+            docArray.append(doc.page_content)
+        return docArray
