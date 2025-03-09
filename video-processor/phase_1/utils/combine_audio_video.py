@@ -101,8 +101,8 @@ def generate_tts(video_path, language_code, language_name, ssml_gender, transcri
         final_output_path = os.path.join(
             os.path.dirname(video_path), "final_output.mp3"
         )
-        final_audio.export(adjusted_audio_path, format="mp3")
-        print(f"Adjusted audio saved to {adjusted_audio_path}")
+        final_audio.export(final_output_path, format="mp3")
+        print(f"Adjusted audio saved to {final_output_path}")
         # Export the final combined audio
         # final_output_path = os.path.join(
         #     os.path.dirname(video_path), "final_output.mp3"
@@ -114,7 +114,7 @@ def generate_tts(video_path, language_code, language_name, ssml_gender, transcri
         for temp_file in temp_files:
             os.remove(temp_file)
 
-        return adjusted_audio_path
+        return final_output_path
 
     except Exception as e:
         print(f"Error generating TTS: {str(e)}")
