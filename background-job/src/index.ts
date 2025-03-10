@@ -83,10 +83,17 @@ fastify.post("/update/vectorstore/", async (request, reply) => {
 
     try {
         const data = request.body as UpdateVectorStoreRequest
-        if (data.processStatus !== 'COMPLETED') {
-            const requestToWebApp = await axios.post(process.env.WEB_APP_URL!, data);
+        console.log(data)
+        if (data.processStatus == 'COMPLETED') {
+            const requestToWebApp = await axios.post(process.env.WEB_APP_URL!, {projectId : data.projectId ,processStatus : data.processStatus });
             if (requestToWebApp.status === 200) {
-                console.log('Project status updated');
+                console.log('Project process status updated');
+            }
+        }
+        else {
+            const requestToWebApp = await axios.post(process.env.WEB_APP_URL!, {projectId : data.projectId ,processStatus : 'FAILED' });
+            if (requestToWebApp.status === 200) {
+                console.log('Project process status updated');
             }
         }
 

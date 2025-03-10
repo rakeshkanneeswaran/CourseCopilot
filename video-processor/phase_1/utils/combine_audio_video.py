@@ -67,7 +67,7 @@ def generate_tts(video_path, language_code, language_name, ssml_gender, transcri
         temp_files = []
 
         # Use a thread pool to limit concurrent requests
-        with ThreadPoolExecutor(max_workers=1) as executor:
+        with ThreadPoolExecutor(max_workers=30) as executor:
             futures = []
             for i, segment in enumerate(transcription):
                 print(f"Processing segment {i + 1}/{len(transcription)}")

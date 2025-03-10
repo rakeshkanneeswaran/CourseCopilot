@@ -44,4 +44,7 @@ export interface UpdateProjectVideoStatusRequest {
 export interface UpdateVectorStoreRequest {
     projectId: string;
     processStatus: string;
+    message:string
+    userId: string
+    serviceName: string,
 }

@@ -2,10 +2,8 @@ import { NextResponse } from 'next/server';
 import { ProjectService } from '@/data-core/services/project-service';
 
 interface RequestBody {
-    status: number,
-    received: boolean,
+    processStatus: string,
     projectId: string,
-    userId: string,
 }
 
 export async function GET() {
@@ -16,7 +14,7 @@ export async function POST(req: Request) {
     try {
         const data: RequestBody = await req.json();
 
-        if (!data.received || data.status !== 200) {
+        if (data.processStatus != 'COMPLETED') {
             throw new Error(`processing failed for project ${data.projectId}`);
         }
 

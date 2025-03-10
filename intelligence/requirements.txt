@@ -5,3 +5,5 @@ langchain-ollama
 python-dotenv
 fastapi
 uvicorn
+uvicorn[standard]
+faiss-cpu

@@ -24,9 +24,7 @@ async def main(request: Request, background_tasks: BackgroundTasks):
         )
         if not (userId and projectId):
             return {"status": 400, "message": "userId and projectId are required"}
-        background_tasks.add_task(
-            await BackgroundJobService.run_background_job(userId, projectId)
-        )
+        background_tasks.add_task(BackgroundJobService.run_background_job, userId, projectId)
         return {"status": 200, "message": "Job started"}
     except Exception as e:
         return {"error": str(e)}

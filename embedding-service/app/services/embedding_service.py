@@ -3,6 +3,7 @@ from langchain_community.vectorstores import FAISS
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from services.file_service import FileService
 import json
+import os
 
 embeddings = OllamaEmbeddings(model="llama3")
 
@@ -18,12 +19,22 @@ text_splitter = RecursiveCharacterTextSplitter(
 class EmbeddingService:
     @staticmethod
     def createVectorStore(texts):
+        print(texts)
         vectorstore = FAISS.from_texts(texts, embedding=embeddings)
+        print("Vectorstore created")
         return vectorstore
 
     @staticmethod
     def saveVectorStore(vectorstore, path):
-        vectorstore.save_local(path)
+    # Create directory if it does not exist
+     if not os.path.exists(path):
+        os.makedirs(path)
+        print(f"Directory created at: {path}")
+     else:
+        print(f"Directory already exists at: {path}")
+    
+     print("Saving vectorstore at path:", path)
+     vectorstore.save_local(path)
 
     @staticmethod
     def loadVectorStore(path):
