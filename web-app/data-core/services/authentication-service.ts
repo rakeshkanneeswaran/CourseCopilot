@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { UserService } from './user-service';
+import logger from '../utils/logger';
 
 export class AuthenticationService {
     static async signIn(username: string, password: string) {
@@ -14,7 +15,7 @@ export class AuthenticationService {
                 userId
             }
         } catch (error) {
-            console.error('Error signing in:', error);
+            logger.error('Error signing in:', error);
             throw new Error('Failed to sign in');
         }
 
@@ -25,7 +26,7 @@ export class AuthenticationService {
             const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
             return decoded;
         } catch (error) {
-            console.error('Error verifying token:', error);
+            logger.error('Error verifying token:', error);
             throw new Error('Invalid token');
         }
     }

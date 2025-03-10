@@ -1,100 +1,79 @@
-
-
 import prismaClient from "@/data-core/database";
+import logger from "../utils/logger";
+
 export class UserService {
     static async login({ username, password }: { username: string, password: string }) {
         try {
+            logger.info(`Login attempt: ${username}`);
+
             const userExist = await prismaClient.credentials.findUnique({
-                where: {
-                    username,
-                    password
+                where: { username, password },
+                include: { User: true }
+            });
 
-                },
-                include: {
-                    User: true
-                }
-            })
             if (userExist && userExist.User?.id) {
-                return {
-                    status: true,
-                    userId: userExist.User?.id
-                }
+                logger.info(`User logged in successfully: ${userExist.User.id}`);
+                return { status: true, userId: userExist.User.id };
             }
-            return {
-                status: false,
-                userId: ""
-            }
-        } catch (error) {
-            console.error('Error logging in:', error);
-            throw new Error('Failed to login');
-        }
 
+            logger.warn(`Login failed for username: ${username}`);
+            return { status: false, userId: "" };
+        } catch (error) {
+            logger.error(`Error logging in for user ${username}:`, error);
+            throw new Error("Failed to login");
+        }
     }
 
     static async createUser({ username, password, name }: { username: string, password: string, name: string }) {
         try {
-            const result = await prismaClient.$transaction(async (tx) => {
-                const userExist = await tx.credentials.findMany({
-                    where: {
-                        username
-                    }
-                })
+            logger.info(`User signup attempt: ${username}`);
 
-                if (userExist.length > 0) {
-                    return {
-                        status: false,
-                        userId: ""
-                    }
+            const result = await prismaClient.$transaction(async (tx) => {
+                const userExist = await tx.credentials.findFirst({ where: { username } });
+
+                if (userExist) {
+                    logger.warn(`Signup failed: Username already exists - ${username}`);
+                    return { status: false, userId: "" };
                 }
 
                 const credentials = await tx.credentials.create({
-                    data: {
-                        username,
-                        password
-                    }
+                    data: { username, password }
                 });
 
                 const user = await tx.user.create({
-                    data: {
-                        credentialId: credentials.id,
-                        name,
-                        email: username
-                    }
-                })
+                    data: { credentialId: credentials.id, name, email: username }
+                });
 
-                return {
-                    status: false,
-                    userId: user.id
-                }
-            })
+                logger.info(`User created successfully: ${user.id}`);
+                return { status: true, userId: user.id };
+            });
 
-            return result
-
-
+            return result;
         } catch (error) {
-            console.error('Error signing up:', error);
-            throw new Error('Failed to signup');
+            logger.error(`Error signing up user ${username}:`, error);
+            throw new Error("Failed to signup");
         }
     }
 
     static async findUserByCredentials({ username, password }: { username: string, password: string }) {
         try {
+            logger.debug(`Finding user by credentials: ${username}`);
+
             const userExist = await prismaClient.credentials.findUnique({
-                where: {
-                    username,
-                    password
-                },
-                select: {
-                    User: true
-                }
-            })
+                where: { username, password },
+                select: { User: true }
+            });
+
             if (!userExist?.User) {
-                throw new Error('User not found');
+                logger.warn(`User not found for credentials: ${username}`);
+                throw new Error("User not found");
             }
-            return userExist.User.id
+
+            logger.info(`User found: ${userExist.User.id}`);
+            return userExist.User.id;
         } catch (error) {
-            console.error('Error finding user by credentials:', error);
-            throw new Error('Failed to find user by credentials');
+            logger.error(`Error finding user by credentials ${username}:`, error);
+            throw new Error("Failed to find user by credentials");
         }
     }
 }

@@ -1,132 +1,94 @@
 import prismaClient from "@/data-core/database";
 import { S3Service } from "./aws/s3-service";
+import logger from "../utils/logger";
 
 interface VideoTranscriptMap {
     videoUrl: string,
     transcriptUrl: string
 }
+
 export class ProjectService {
     static async createProject({ userId, title, description }: { userId: string, title: string, description: string }): Promise<string> {
         try {
+            logger.info(`Creating project for user: ${userId}`);
             const project = await prismaClient.project.create({
-                data: {
-                    title,
-                    userId,
-                    description
-                }
-            })
+                data: { title, userId, description }
+            });
+            logger.info(`Project created successfully with ID: ${project.id}`);
             return project.id;
         } catch (error) {
+            logger.error(`Error creating project for userId: ${userId}`, error);
             throw error;
         }
     }
-    static async getProjectsByUserId({ userId }: { userId: string }): Promise<{
-        userId: string;
-        title: string;
-        createdAt: Date
-        id: string;
-        status: string;
-    }[]> {
+
+    static async getProjectsByUserId({ userId }: { userId: string }) {
         try {
+            logger.info(`Fetching projects for user: ${userId}`);
             const projects = await prismaClient.project.findMany({
-                where: {
-                    userId
-                },
-                select: {
-                    userId: true,
-                    title: true,
-                    createdAt: true,
-                    id: true,
-                    status: true
-                }
-            })
+                where: { userId },
+                select: { userId: true, title: true, createdAt: true, id: true, status: true }
+            });
+            logger.info(`Fetched ${projects.length} projects for user: ${userId}`);
             return projects;
         } catch (error) {
+            logger.error(`Error fetching projects for userId: ${userId}`, error);
             throw error;
         }
     }
 
     static async updateProjectStatus(projectId: string, status: string) {
         try {
-            const projectExists = await prismaClient.project.findFirst({
-                where: {
-                    id: projectId
-                }
-            })
+            logger.info(`Updating status for project: ${projectId} to ${status}`);
+            const projectExists = await prismaClient.project.findFirst({ where: { id: projectId } });
             if (!projectExists) {
+                logger.warn(`Project not found for id: ${projectId}`);
                 throw new Error(`Project not found for id: ${projectId}`);
             }
-            await prismaClient.project.update({
-                where: { id: projectId },
-                data: { status: status },
-            })
+            await prismaClient.project.update({ where: { id: projectId }, data: { status } });
+            logger.info(`Project status updated successfully for project: ${projectId}`);
         } catch (error) {
+            logger.error(`Error updating project status for id: ${projectId}`, error);
             throw error;
         }
     }
 
     static async getProjectDetailsFromS3({ userId, projectId }: { userId: string, projectId: string }) {
         try {
-            const userData = {
-                userId,
-                projectId
-            }
-            const videoUrls = await S3Service.getProjectFileUrl({ userData });
+            logger.debug(`Fetching project details from S3 for user: ${userId}, project: ${projectId}`);
+            const videoUrls = await S3Service.getProjectFileUrl({ userData: { userId, projectId } });
+            logger.info(`Successfully fetched project details from S3 for project: ${projectId}`);
             return videoUrls;
         } catch (error) {
-
-            console.error('Error fetching project details from S3:', error);
-            throw new Error(`Unable to fetch project details from S3 for user data userId ; ${userId}  projectId ${projectId} `);
+            logger.error(`Error fetching project details from S3 for project: ${projectId}`, error);
+            throw new Error(`Unable to fetch project details from S3 for userId: ${userId}, projectId: ${projectId}`);
         }
     }
 
     static async deleteProject({ userId, projectId }: { userId: string, projectId: string }) {
         try {
+            logger.info(`Attempting to delete project: ${projectId} for user: ${userId}`);
             await prismaClient.$transaction(async (tx) => {
-                // Check if the project exists
-                const projectExist = await tx.project.findUnique({
-                    where: { userId, id: projectId }
-                });
+                const projectExist = await tx.project.findUnique({ where: { userId, id: projectId } });
                 if (!projectExist) {
+                    logger.warn(`Project not found for deletion: ${projectId}`);
                     throw new Error(`Project not found for userId: ${userId}, projectId: ${projectId}`);
                 }
-
-                // Delete VideoMetadata first (depends on Video)
                 await tx.videoMetadata.deleteMany({
-                    where: {
-                        videoId: {
-                            in: (await tx.video.findMany({
-                                where: { projectId },
-                                select: { id: true }
-                            })).map(v => v.id)
-                        }
-                    }
+                    where: { videoId: { in: (await tx.video.findMany({ where: { projectId }, select: { id: true } })).map(v => v.id) } }
                 });
-
-                // Delete Videos (depends on Project)
-                await tx.video.deleteMany({
-                    where: { projectId }
-                });
-
-
-                await tx.projectMetaData.deleteMany({
-                    where: { projectId }
-                })
-
-                // Delete Project last
-                await tx.project.delete({
-                    where: { id: projectId }
-                });
+                await tx.video.deleteMany({ where: { projectId } });
+                await tx.projectMetaData.deleteMany({ where: { projectId } });
+                await tx.project.delete({ where: { id: projectId } });
             });
-
-            // Delete project files from S3 (outside transaction)
             await S3Service.deleteProjectFiles({ userData: { userId, projectId } });
-
+            logger.info(`Project deleted successfully: ${projectId}`);
         } catch (error) {
-            console.error("Error deleting project:", error);
+            logger.error(`Error deleting project for userId: ${userId}, projectId: ${projectId}`, error);
             throw new Error(`Unable to delete project for userId: ${userId}, projectId: ${projectId}`);
         }
     }
+
 
     static async addProjectMetaData({ projectId, generate_translate, languages, generate_subtitle, generate_transcript, gender }: { projectId: string, generate_translate: boolean, languages: string[], generate_subtitle: boolean, generate_transcript: boolean, gender: string }) {
         try {
@@ -193,6 +155,8 @@ export class ProjectService {
             console.error("Error fetching project details:", error);
             throw error;
         }
+
+
     }
 
     static async getProjectOriginalContent({ projectId, userId }: { projectId: string, userId: string }) {
@@ -227,15 +191,13 @@ export class ProjectService {
                 videoTranscriptMap.push({ videoUrl, transcriptUrl })
 
             }
-            console.log("this is videoTranscriptMap")
-            console.log(videoTranscriptMap)
             return videoTranscriptMap;
         } catch (error) {
             console.error('Error fetching project original content from S3:', error);
             throw new Error(`Unable to fetch project original content from S3 for user data userId ; ${userId}  projectId ${projectId} `);
         }
-    }
 
+    }
 
     static async getProjectContentForDifferentLanguages({ projectId, userId, languageName }: { projectId: string, userId: string, languageName: string }) {
         try {
@@ -269,3 +231,6 @@ export class ProjectService {
     }
 
 }
+
+
+
