@@ -6,11 +6,52 @@ from google.cloud import texttospeech
 import json
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
+import threading
+from functools import wraps
+
+# Disable gRPC fork support to prevent the warnings
+os.environ["GRPC_FORK_SUPPORT_ENABLED"] = "0"
+
+# Create a semaphore to limit concurrent API calls
+# This helps prevent overwhelming the gRPC service
+api_semaphore = threading.Semaphore(5)  # Limit to 2 concurrent requests
 
 
+def retry_on_error(max_attempts=4, delay_seconds=2):
+    """Decorator to retry a function on failure with exponential backoff."""
+
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            attempts = 0
+            current_delay = delay_seconds
+
+            while attempts < max_attempts:
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    attempts += 1
+                    if attempts == max_attempts:
+                        print(f"Failed after {max_attempts} attempts: {str(e)}")
+                        raise
+
+                    print(
+                        f"Attempt {attempts} failed with error: {str(e)}. Retrying in {current_delay} seconds..."
+                    )
+                    time.sleep(current_delay)
+                    # Exponential backoff
+                    current_delay *= 2
+
+        return wrapper
+
+    return decorator
+
+
+@retry_on_error(max_attempts=4, delay_seconds=2)
 def synthesize_speech(text, output_filename, language_code, language_name, ssml_gender):
     """
     Synthesize speech from text using Google Cloud Text-to-Speech API.
+    Includes semaphore to limit concurrent API calls.
 
     Args:
         text (str): The text to convert to speech.
@@ -22,171 +63,183 @@ def synthesize_speech(text, output_filename, language_code, language_name, ssml_
     Returns:
         None
     """
-    try:
-        # Create a Text-to-Speech client
-        client = texttospeech.TextToSpeechClient()
+    # Use semaphore to limit concurrent API calls
+    with api_semaphore:
+        try:
+            # Create a new client for each request to avoid conflicts
+            client = texttospeech.TextToSpeechClient()
 
-        # Set the text input
-        input_text = texttospeech.SynthesisInput(text=text)
+            # Handle excessively long text by chunking if needed
+            if len(text) > 5000:  # Google has a ~5000 character limit
+                chunks = [text[i : i + 4500] for i in range(0, len(text), 4500)]
+                audio_segments = []
 
-        # Convert the string ssml_gender to the enum value
-        gender_enum = getattr(texttospeech.SsmlVoiceGender, ssml_gender.upper())
+                for i, chunk in enumerate(chunks):
+                    chunk_filename = f"{output_filename}.chunk{i}.mp3"
+                    # Process each chunk
+                    input_text = texttospeech.SynthesisInput(text=chunk)
+                    gender_enum = getattr(
+                        texttospeech.SsmlVoiceGender, ssml_gender.upper()
+                    )
+                    voice = texttospeech.VoiceSelectionParams(
+                        language_code=language_code,
+                        name=language_name,
+                        ssml_gender=gender_enum,
+                    )
+                    audio_config = texttospeech.AudioConfig(
+                        audio_encoding=texttospeech.AudioEncoding.MP3
+                    )
 
-        # Configure the voice settings
-        voice = texttospeech.VoiceSelectionParams(
-            language_code=language_code, name=language_name, ssml_gender=gender_enum
-        )
+                    response = client.synthesize_speech(
+                        input=input_text, voice=voice, audio_config=audio_config
+                    )
 
-        # Set the audio configuration
-        audio_config = texttospeech.AudioConfig(
-            audio_encoding=texttospeech.AudioEncoding.MP3
-        )
+                    with open(chunk_filename, "wb") as out:
+                        out.write(response.audio_content)
 
-        # Perform the text-to-speech request
-        response = client.synthesize_speech(
-            input=input_text, voice=voice, audio_config=audio_config
-        )
+                    audio_segments.append(AudioSegment.from_file(chunk_filename))
 
-        # Save the audio to a file
-        with open(output_filename, "wb") as out:
-            out.write(response.audio_content)
-        print(f"Audio content written to '{output_filename}'")
+                # Combine chunks
+                combined = sum(audio_segments[1:], audio_segments[0])
+                combined.export(output_filename, format="mp3")
 
-    except Exception as e:
-        print(f"Error synthesizing speech: {str(e)}")
-        raise
+                # Clean up chunk files
+                for i in range(len(chunks)):
+                    chunk_file = f"{output_filename}.chunk{i}.mp3"
+                    if os.path.exists(chunk_file):
+                        os.remove(chunk_file)
+            else:
+                # Standard processing for shorter text
+                input_text = texttospeech.SynthesisInput(text=text)
+                gender_enum = getattr(texttospeech.SsmlVoiceGender, ssml_gender.upper())
+                voice = texttospeech.VoiceSelectionParams(
+                    language_code=language_code,
+                    name=language_name,
+                    ssml_gender=gender_enum,
+                )
+                audio_config = texttospeech.AudioConfig(
+                    audio_encoding=texttospeech.AudioEncoding.MP3
+                )
+
+                response = client.synthesize_speech(
+                    input=input_text, voice=voice, audio_config=audio_config
+                )
+
+                with open(output_filename, "wb") as out:
+                    out.write(response.audio_content)
+
+            print(f"Audio content written to '{output_filename}'")
+
+        except Exception as e:
+            print(f"Error synthesizing speech for '{output_filename}': {str(e)}")
+            raise
+
+
+def process_batch(
+    batch, start_index, language_code, language_name, ssml_gender, total_segments
+):
+    """Process a batch of transcription segments."""
+    temp_files = []
+    futures = []
+
+    with ThreadPoolExecutor(max_workers=8) as executor:
+        for i, segment in enumerate(batch):
+            global_index = start_index + i
+            print(f"Processing segment {global_index + 1}/{total_segments}")
+            temp_file = f"temp_audio_{global_index}.mp3"
+
+            future = executor.submit(
+                synthesize_speech,
+                segment["text"],
+                temp_file,
+                language_code,
+                language_name,
+                ssml_gender,
+            )
+            futures.append(future)
+            temp_files.append(temp_file)
+
+        # Wait for all futures in this batch to complete
+        for future in as_completed(futures):
+            try:
+                future.result()  # This will raise any exceptions from the task
+            except Exception as e:
+                print(f"A task in the batch failed: {str(e)}")
+                # Continue processing other files, don't raise here
+
+    return temp_files
 
 
 def generate_tts(video_path, language_code, language_name, ssml_gender, transcription):
     try:
+        # Get video duration
         video_clip = VideoFileClip(video_path)
         video_duration = video_clip.duration
         video_clip.close()
 
         final_audio = AudioSegment.silent(duration=0)
-        temp_files = []
+        all_temp_files = []
 
-        # Use a thread pool to limit concurrent requests
-        with ThreadPoolExecutor(max_workers=30) as executor:
-            futures = []
-            for i, segment in enumerate(transcription):
-                print(f"Processing segment {i + 1}/{len(transcription)}")
-                temp_file = f"temp_audio_{i}.mp3"
-                futures.append(
-                    executor.submit(
-                        synthesize_speech,
-                        segment["text"],
-                        temp_file,
-                        language_code,
-                        language_name,
-                        ssml_gender,
-                    )
-                )
-                temp_files.append(temp_file)
+        # Process in smaller batches to avoid overwhelming the gRPC service
+        batch_size = 5
+        for batch_start in range(0, len(transcription), batch_size):
+            batch_end = min(batch_start + batch_size, len(transcription))
+            batch = transcription[batch_start:batch_end]
 
-            # Wait for all futures to complete
-            for future in as_completed(futures):
-                future.result()  # Raise any exceptions
+            # Process each batch and collect temp files
+            temp_files = process_batch(
+                batch,
+                batch_start,
+                language_code,
+                language_name,
+                ssml_gender,
+                len(transcription),
+            )
+            all_temp_files.extend(temp_files)
+
+            # Optional: Add a small delay between batches to prevent rate limiting
+            if batch_end < len(transcription):
+                time.sleep(1)
 
         # Combine all audio segments
-        for temp_file in temp_files:
-            current_segment = AudioSegment.from_file(temp_file)
-            final_audio += current_segment
+        successful_files = []
+        for temp_file in all_temp_files:
+            if os.path.exists(temp_file) and os.path.getsize(temp_file) > 0:
+                try:
+                    current_segment = AudioSegment.from_file(temp_file)
+                    final_audio += current_segment
+                    successful_files.append(temp_file)
+                except Exception as e:
+                    print(f"Error processing {temp_file}: {str(e)}")
+
+        # Adjust audio speed to match video duration
         audio_duration = len(final_audio) / 1000
         speed_factor = video_duration / audio_duration
         print(
-            f"Speed Factor : {speed_factor} and Video : {video_duration} and Audio : {audio_duration}"
+            f"Speed Factor: {speed_factor} and Video duration: {video_duration} and Audio duration: {audio_duration}"
         )
 
-        # final_audio = final_audio.speedup(playback_speed = speed_factor)
-        # Export the final combined audio
+        # Adjust audio speed to match video length
+        # final_audio = final_audio.speedup(playback_speed=speed_factor)
         final_output_path = os.path.join(
             os.path.dirname(video_path), "final_output.mp3"
         )
         final_audio.export(final_output_path, format="mp3")
         print(f"Adjusted audio saved to {final_output_path}")
-        # Export the final combined audio
-        # final_output_path = os.path.join(
-        #     os.path.dirname(video_path), "final_output.mp3"
-        # )
-        # final_audio.export(final_output_path, format="mp3")
-        # print(f"Final audio saved to {final_output_path}")
 
         # Clean up temporary files
-        for temp_file in temp_files:
-            os.remove(temp_file)
+        for temp_file in successful_files:
+            try:
+                if os.path.exists(temp_file):
+                    os.remove(temp_file)
+            except Exception as e:
+                print(f"Error removing temporary file {temp_file}: {str(e)}")
 
         return final_output_path
 
     except Exception as e:
         print(f"Error generating TTS: {str(e)}")
         raise
-
-
-# def generate_tts(video_path, language_code, language_name, ssml_gender, transcription):
-#     """
-#     Generate TTS audio for each line in the transcription and combine it into a single audio file.
-
-#     Args:
-#         video_path (str): Path to the input video file.
-#         language_code (str): Language code for TTS (e.g., "en-US").
-#         language_name (str): Voice name for TTS (e.g., "en-US-Wavenet-D").
-#         ssml_gender (str): Gender of the voice ("male" or "female").
-#         transcription (list): List of transcription segments with text and timestamps.
-
-#     Returns:
-#         str: Path to the final combined audio file.
-#     """
-#     try:
-#         # Load the video to get its duration
-#         video_clip = VideoFileClip(video_path)
-#         video_duration = video_clip.duration
-#         video_clip.close()
-
-#         # Initialize final audio as silence
-#         final_audio = AudioSegment.silent(duration=0)
-#         temp_files = []
-
-#         # Process each transcription segment
-#         for i, segment in enumerate(transcription):
-#             print(f"Processing segment {i + 1}/{len(transcription)}")
-#             # Generate TTS for the text using Google Cloud Text-to-Speech API
-#             temp_file = f"temp_audio_{i}.mp3"
-#             synthesize_speech(
-#                 segment["text"], temp_file, language_code, language_name, ssml_gender
-#             )
-#             temp_files.append(temp_file)
-
-#             # Load the generated audio and concatenate it to final audio
-#             current_segment = AudioSegment.from_file(temp_file)
-#             final_audio += current_segment
-
-#             # Add silence between segments if applicable
-#             # if i < len(transcription) - 1:
-#             #     current_end = float(segment["end_time"].replace("s", "")) * 1000
-#             #     next_start = (
-#             #         float(transcription[i + 1]["start_time"].replace("s", "")) * 1000
-#             #     )
-#             #     silence_duration = next_start - current_end
-#             #     silence = AudioSegment.silent(duration=max(silence_duration, 0))
-#             #     final_audio += silence
-#             time.sleep(5)
-#         # Export the final combined audio
-#         final_output_path = os.path.join(
-#             os.path.dirname(video_path), "final_output.mp3"
-#         )
-#         final_audio.export(final_output_path, format="mp3")
-#         print(f"Final audio saved to {final_output_path}")
-
-#         # Clean up temporary files
-#         for temp_file in temp_files:
-#             os.remove(temp_file)
-
-#         return final_output_path
-
-#     except Exception as e:
-#         print(f"Error generating TTS: {str(e)}")
-#         raise
 
 
 def combine_video_audio(
@@ -243,21 +296,14 @@ def combine_video_audio(
     # Now use the dynamically selected values in your function
     print(f"Processing {language}: using code {selected_code}, voice {selected_voice}")
 
-    # Rest of your implementation using selected_code and selected_voice
-    # ...
-
-    # Now use the dynamically selected values in your function
-    # Rest of your implementation...
     try:
         # Generate TTS audio
         audio_path = generate_tts(
             video_path, selected_code, selected_voice, gender, transcription
         )
-        # Calculate the speed factor to match audio duration to video duration
-
 
         # Prepare FFmpeg command based on whether subtitles are provided
-        if subtitle_path:
+        if subtitle_path and os.path.exists(subtitle_path):
             # FFmpeg command with subtitles
             ffmpeg_command = [
                 "ffmpeg",
@@ -265,8 +311,6 @@ def combine_video_audio(
                 video_path,  # Input video
                 "-i",
                 audio_path,  # Input audio
-                "-i",
-                subtitle_path,  # Input subtitles
                 "-c:v",
                 "libx264",  # Video codec
                 "-c:a",
@@ -297,10 +341,20 @@ def combine_video_audio(
             ]
 
         # Execute the FFmpeg command
-        subprocess.run(ffmpeg_command, check=True)
-        print(f"Video and audio combined successfully: {output_path}")
+        try:
+            subprocess.run(ffmpeg_command, check=True)
+            print(f"Video and audio combined successfully: {output_path}")
+        except subprocess.CalledProcessError as e:
+            print(f"Error running FFmpeg: {str(e)}")
+            # Try alternate command if the first fails (handling path issues)
+            alt_command = ffmpeg_command.copy()
+            if subtitle_path:
+                alt_command[9] = f"subtitles={subtitle_path.replace('\\', '/')}"
 
-        # Clean up the generated audio file
+            subprocess.run(alt_command, check=True)
+            print(
+                f"Video and audio combined successfully with alternate command: {output_path}"
+            )
 
         return output_path
 
@@ -331,6 +385,11 @@ if __name__ == "__main__":
     ]
     output_path = "output_video.mp4"
     subtitle_path = "output.srt"
-    combine_video_audio(
-        video_path, transcription, output_path, subtitle_path=subtitle_path
-    )
+
+    try:
+        # Set a longer timeout for each request
+        combine_video_audio(
+            video_path, transcription, output_path, subtitle_path=subtitle_path
+        )
+    except Exception as e:
+        print(f"Main process failed: {str(e)}")
