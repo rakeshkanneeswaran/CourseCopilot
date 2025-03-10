@@ -26,10 +26,10 @@ from botocore.exceptions import NoCredentialsError, PartialCredentialsError, Cli
 
 # from dotenv import load_dotenv
 # Import your existing utility functions
-from utils.transcribe import generate_transcript
-from utils.translate import translate_transcript
-from utils.combine_audio_video import combine_video_audio
-from utils.generate_srt import generate_srt  # Assuming this function exists
+from services.transcribe import generate_transcript
+from services.translate import translate_transcript
+from services.combine_audio_video import combine_video_audio
+from services.generate_srt import generate_srt  # Assuming this function exists
 import json
 
 load_dotenv()
