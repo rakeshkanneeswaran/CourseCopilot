@@ -357,7 +357,6 @@ async def process_video_async(request, project_temp_dir, video_contents):
         api_url = "http://localhost:3001/project/update/process-video"
 
         response = requests.post(api_url, json=data)
-        print(response.json())
         logger.info("Processing completed successfully")
         return {
             "projectId": request.projectId,
