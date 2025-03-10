@@ -30,7 +30,10 @@ async def websocket_endpoint(websocket: WebSocket, userId: str, projectId: str):
         while True:
             data = await websocket.receive_text()
             answer = VectorStoreService.retrieveText(vectorStore, data)
-            print(answer)
+            test_content = VectorStoreService.getContentForTestGeneration(vectorStore)
+            mcq_answer = LLMService.generateMCQs(test_content)
+            print("this is mcq answer")
+            print(mcq_answer)
             llm_answer = LLMService.generateResponse(answer, data)
             await websocket.send_text(json.dumps(llm_answer))
 

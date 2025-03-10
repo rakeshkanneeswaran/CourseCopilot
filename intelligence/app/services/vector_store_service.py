@@ -1,5 +1,7 @@
 from langchain_community.vectorstores import FAISS
 from langchain_ollama import OllamaEmbeddings
+import random
+
 
 embeddings = OllamaEmbeddings(model="llama3")
 
@@ -23,3 +25,16 @@ class VectorStoreService:
         for doc in retrieved_documents:
             docArray.append(doc.page_content)
         return docArray
+
+    @staticmethod
+    def getContentForTestGeneration(vectorstore):
+        all_docs = list(vectorstore.docstore._dict.values())[:]
+        total_docs = len(all_docs)
+        if total_docs == 0:
+            return "No documents stored."
+
+        RandomIndexs = random.sample(range(total_docs), min(10, total_docs))
+        contentForTest = []
+        for i in RandomIndexs:
+            contentForTest.append(all_docs[i].page_content)
+        return contentForTest

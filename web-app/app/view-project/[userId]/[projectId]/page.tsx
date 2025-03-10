@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import {
   getOriginalContent,
@@ -42,6 +42,13 @@ export default function Page() {
     useState<string[]>();
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [inputValue, setInputValue] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messageFromIntellignece]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -192,6 +199,7 @@ export default function Page() {
                 {message}
               </p>
             ))}
+            <div ref={messagesEndRef}></div>
           </div>
 
           {/* Input box at the bottom */}
