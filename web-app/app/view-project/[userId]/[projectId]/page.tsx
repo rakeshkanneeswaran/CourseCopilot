@@ -53,7 +53,7 @@ export default function Page() {
 
   useEffect(() => {
     const socket = new WebSocket(
-      "ws://localhost:3003/ws/c75bbcd5-0c3c-4818-a7b4-a5d0b7f8d268/e364401a-2a65-44fe-9322-0140cc1eaeef"
+      `ws://localhost:3004/ws/${userId}/${projectId}`
     );
     socket.onopen = () => {
       console.log("Connected to server");
@@ -68,7 +68,7 @@ export default function Page() {
     return () => {
       socket.close();
     };
-  }, []);
+  }, [projectId, userId]);
 
   useEffect(() => {
     const fetchProjectDetails = async () => {

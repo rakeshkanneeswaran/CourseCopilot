@@ -2,8 +2,10 @@ import { NextResponse } from 'next/server';
 import { ProjectService } from '@/data-core/services/project-service';
 
 interface RequestBody {
-    projectId: string;
-    status: string;
+    status: number,
+    received: boolean,
+    projectId: string,
+    userId: string,
 }
 
 export async function GET() {
@@ -14,12 +16,12 @@ export async function POST(req: Request) {
     try {
         const data: RequestBody = await req.json();
 
-        if (!data.projectId) {
-            return NextResponse.json({ error: 'Missing projectId or status' }, { status: 400 });
+        if (!data.received || data.status !== 200) {
+            throw new Error(`processing failed for project ${data.projectId}`);
         }
 
-        await ProjectService.updateProjectStatus(data.projectId, data.status);
-        return NextResponse.json({ message: 'Project status updated', received: data });
+        await ProjectService.updateProjectStatus(data.projectId, "COMPLETED");
+        return NextResponse.json({ message: 'Project status updated', received: data }, { status: 200 });
     } catch (error) {
         console.error('API Error:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

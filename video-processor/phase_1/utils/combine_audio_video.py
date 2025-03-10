@@ -67,7 +67,7 @@ def generate_tts(video_path, language_code, language_name, ssml_gender, transcri
         temp_files = []
 
         # Use a thread pool to limit concurrent requests
-        with ThreadPoolExecutor(max_workers=2) as executor:
+        with ThreadPoolExecutor(max_workers=1) as executor:
             futures = []
             for i, segment in enumerate(transcription):
                 print(f"Processing segment {i + 1}/{len(transcription)}")
@@ -94,9 +94,11 @@ def generate_tts(video_path, language_code, language_name, ssml_gender, transcri
             final_audio += current_segment
         audio_duration = len(final_audio) / 1000
         speed_factor = video_duration / audio_duration
-        print(f"Speed Factor : {speed_factor} and Video : {video_duration} and Audio : {audio_duration}" )
-        
-        final_audio = final_audio.speedup(playback_speed = speed_factor)
+        print(
+            f"Speed Factor : {speed_factor} and Video : {video_duration} and Audio : {audio_duration}"
+        )
+
+        # final_audio = final_audio.speedup(playback_speed = speed_factor)
         # Export the final combined audio
         final_output_path = os.path.join(
             os.path.dirname(video_path), "final_output.mp3"
@@ -200,46 +202,34 @@ def combine_video_audio(
     LANGUAGE_MAPPINGS = {
         "english": {
             "code": "en-US",
-            "voices": {
-                "male": "en-US-Neural2-J",
-                "female": "en-US-Neural2-F"
-            }
+            "voices": {"male": "en-US-Neural2-J", "female": "en-US-Neural2-F"},
         },
         "french": {
             "code": "fr-FR",
-            "voices": {
-                "male": "fr-FR-Standard-D   ",
-                "female": "fr-FR-Standard-C"
-            }
+            "voices": {"male": "fr-FR-Standard-D", "female": "fr-FR-Standard-C"},
         },
         "german": {
             "code": "de-DE",
-            "voices": {
-                "male": "de-DE-Standard-G",
-                "female": "de-DE-Standard-D"
-            }
+            "voices": {"male": "de-DE-Standard-G", "female": "de-DE-Standard-D"},
         },
         "tamil": {
             "code": "ta-IN",
-            "voices": {
-                "male": "ta-IN-Standard-D",
-                "female": "ta-IN-Standard-A"
-            }
-        }
+            "voices": {"male": "ta-IN-Standard-D", "female": "ta-IN-Standard-A"},
+        },
         # Add more languages as needed
     }
-    
+
     # Process language_name from payload (case-insensitive)
     language = language_name.lower() if language_name else "english"
-    
+
     # Get gender from parameter or use default
     gender = ssml_gender.lower() if ssml_gender else "male"
-    
+
     # Determine correct values based on the inputs
     if language in LANGUAGE_MAPPINGS:
         language_data = LANGUAGE_MAPPINGS[language]
         selected_code = language_data["code"]
-        
+
         if gender in language_data["voices"]:
             selected_voice = language_data["voices"][gender]
         else:
@@ -249,13 +239,13 @@ def combine_video_audio(
         # Fallback to default values if language not found
         selected_code = "en-US"
         selected_voice = "en-US-Neural2-J"
-    
+
     # Now use the dynamically selected values in your function
     print(f"Processing {language}: using code {selected_code}, voice {selected_voice}")
-    
+
     # Rest of your implementation using selected_code and selected_voice
     # ...
-    
+
     # Now use the dynamically selected values in your function
     # Rest of your implementation...
     try:

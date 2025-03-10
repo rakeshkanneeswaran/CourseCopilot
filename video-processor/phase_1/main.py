@@ -141,6 +141,8 @@ class ProcessVideoRequest(BaseModel):
     userId: str
     projectId: str
     projectMetaData: ProjectMetaData
+    serviceName: str
+    message: str
 
 
 app = FastAPI()
@@ -163,6 +165,11 @@ async def process_video(
     projectId = request.projectId
     userId = request.userId
     projectMetaData = request.projectMetaData
+    print(f"this is valud of request {request}")
+
+    print(
+        f"request received  for {request.userId} , {request.projectId}]from {request.serviceName} with message {request.message}"
+    )
 
     # Create project-specific temp directory
     project_temp_dir = os.path.join(TEMP_DIRECTORY, projectId)
@@ -197,6 +204,8 @@ async def process_video(
             "userId": userId,
             "projectMetaData": projectMetaData,
             "status": 200,
+            "serviceName": "Video Processor",
+            "message": "request received",
         }
 
     except Exception as e:
@@ -219,7 +228,6 @@ async def process_video_async(request, project_temp_dir, video_contents):
         }
         # 3. Process each video
         for video_key in video_contents:
-
             video_name = os.path.basename(video_key["Key"])
             video_path = os.path.join(project_temp_dir, video_name)
             print("-------------------------------------------------------------")
@@ -311,7 +319,11 @@ async def process_video_async(request, project_temp_dir, video_contents):
 
                     # combine_video_audio(video_path, transcription, output_video_path,subtitle_path,language_code="ta-IN", language_name="ta-IN-Standard-D", ssml_gender="male")
                     combine_video_audio(
-                        video_path, transcription, output_video_path, subtitle_path, language_name=language
+                        video_path,
+                        transcription,
+                        output_video_path,
+                        subtitle_path,
+                        language_name=language,
                     )
 
                     # 8. Upload final video to S3
@@ -333,15 +345,25 @@ async def process_video_async(request, project_temp_dir, video_contents):
                     shutil.rmtree(file_path)
             except Exception as e:
                 logger.error(f"Failed to delete {file_path}. Reason: {str(e)}")
-        
-        data = {"projectId": request.projectId, "status": "COMPLETED"}
 
-        api_url = "http://localhost:3000/api/project/"
+        data = {
+            "projectId": request.projectId,
+            "status": 200,
+            "userId": request.userId,
+            "serviceName": "Video Processor",
+            "message": "Video Processing Completed",
+        }
+
+        api_url = "http://localhost:3001/project/update/process-video"
 
         response = requests.post(api_url, json=data)
         print(response.json())
         logger.info("Processing completed successfully")
-        return {"projectId": request.projectId, "status": "200"}
+        return {
+            "projectId": request.projectId,
+            "userId": request.userId,
+            "status": "200",
+        }
 
     except Exception as e:
         logger.error(f"Error processing video: {str(e)}")
@@ -355,7 +377,7 @@ async def process_video_async(request, project_temp_dir, video_contents):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app="main:app", reload=True)
+    uvicorn.run(app="main:app", port=3002, reload=True)
 
 # @app.post("/process-video")
 # async def process_video(request: ProcessVideoRequest, background_tasks: BackgroundTasks):

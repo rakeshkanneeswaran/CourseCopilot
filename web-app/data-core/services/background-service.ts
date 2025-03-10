@@ -15,11 +15,17 @@ export class BackgroundService {
         try {
             await ProjectService.updateProjectStatus(projectId, 'IN_PROGRESS')
             await ProjectService.addProjectMetaData({ projectId, ...projectMetaData })
+            console.log("this is the value of process.env.VIDEO_PROCESSOR_URL", process.env.VIDEO_PROCESSOR_URL)
+            console.log("this is the data that is sent", { userId, projectId, projectMetaData, serviceName: "WebApp", message: "process video" })
             const response = await axios.post(process.env.VIDEO_PROCESSOR_URL!, {
-                userId, projectId, projectMetaData
+                userId, projectId, projectMetaData, serviceName: "WebApp", message: "process video"
             });
 
-            if (response.status != 200 || response.data.projectId != projectId || response.data.received != true) {
+            console.log(response.data)
+
+
+
+            if (response.data.status != 200 || response.data.received != true) {
                 console.log('Failed to initiate background process , marking the project status to FAILED');
                 await ProjectService.updateProjectStatus(projectId, 'FAILED')
             }
