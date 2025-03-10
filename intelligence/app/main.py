@@ -1,6 +1,7 @@
 from services.s3_service import S3Service
 from services.vector_store_service import VectorStoreService
 from services.llm_service import LLMService
+from services.mcq_service import MCQService
 from dotenv import load_dotenv
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 import uvicorn
@@ -31,11 +32,18 @@ async def websocket_endpoint(websocket: WebSocket, userId: str, projectId: str):
             data = await websocket.receive_text()
             answer = VectorStoreService.retrieveText(vectorStore, data)
             test_content = VectorStoreService.getContentForTestGeneration(vectorStore)
-            mcq_answer = LLMService.generateMCQs(test_content)
+            # this is not being used for any purpose
+            # test_answer = LLMService.generateResponse(test_content)
+
+            #this one is used for mcq generation
+            mcq_answer = MCQService.generateMCQs(test_content)
             print("this is mcq answer")
             print(mcq_answer)
-            llm_answer = LLMService.generateResponse(answer, data)
-            await websocket.send_text(json.dumps(llm_answer))
+
+
+            #this one is used for llm text generation
+            # llm_answer = LLMService.generateResponse(answer, data)
+            await websocket.send_text(json.dumps(mcq_answer))
 
     except WebSocketDisconnect:
         print(f"User {userId} disconnected. Cleaning up...")
