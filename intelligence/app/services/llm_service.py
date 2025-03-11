@@ -1,5 +1,6 @@
 from langchain_ollama.llms import OllamaLLM
 from langchain.prompts import PromptTemplate
+from langchain.chains import LLMChain
 
 llm = OllamaLLM(model="llama3")
 
@@ -14,7 +15,8 @@ prompt = PromptTemplate(
     ),
 )
 
-chain = llm | prompt
+chain = LLMChain(llm=llm, prompt=prompt)
+
 
 class LLMService:
     @staticmethod

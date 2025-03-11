@@ -30,20 +30,19 @@ async def websocket_endpoint(websocket: WebSocket, userId: str, projectId: str):
     try:
         while True:
             data = await websocket.receive_text()
-            answer = VectorStoreService.retrieveText(vectorStore, data)
-            test_content = VectorStoreService.getContentForTestGeneration(vectorStore)
-            # this is not being used for any purpose
-            # test_answer = LLMService.generateResponse(test_content)
+            data = json.loads(data)
+            request_type = data["request_type"]
 
-            #this one is used for mcq generation
-            mcq_answer = MCQService.generateMCQs(test_content)
-            print("this is mcq answer")
-            print(mcq_answer)
-
-
-            #this one is used for llm text generation
-            # llm_answer = LLMService.generateResponse(answer, data)
-            await websocket.send_text(json.dumps(mcq_answer))
+            if request_type == "mcq":
+                test_content = VectorStoreService.getContentForTestGeneration(
+                    vectorStore
+                )
+                mcq_answer = MCQService.generateMCQs(test_content)
+                await websocket.send_text(json.dumps(mcq_answer))
+            elif request_type == "query":
+                context = VectorStoreService.retrieveText(vectorStore, data["query"])
+                llm_answer = LLMService.generateResponse(context, str(data["query"]))
+                await websocket.send_text(json.dumps(llm_answer))
 
     except WebSocketDisconnect:
         print(f"User {userId} disconnected. Cleaning up...")
