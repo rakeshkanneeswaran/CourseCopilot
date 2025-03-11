@@ -3,8 +3,24 @@ from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 from pydantic import BaseModel, Field
+import os
+from langchain_openai import ChatOpenAI
 
-llm = OllamaLLM(model="llama3.2")
+LLM_PROVIDER = os.getenv("openai", "local").lower()
+
+# Initialize the LLM based on the environment variable
+#25 seconds response time
+if LLM_PROVIDER == "openai":
+    llm = ChatOpenAI(
+        model="gpt-4o-mini",
+        temperature=0,
+        max_tokens=None,
+        timeout=None,
+        max_retries=2,
+    )
+else:
+    #50 seconds response time
+    llm = OllamaLLM(model="llama3")
 
 # Define the data structure using Pydantic
 class QuestionItem(BaseModel):
