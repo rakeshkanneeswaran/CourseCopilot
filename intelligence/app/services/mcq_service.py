@@ -4,7 +4,7 @@ from langchain.prompts import PromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 from pydantic import BaseModel, Field
 
-llm = OllamaLLM(model="llama3")
+llm = OllamaLLM(model="llama3.2")
 
 # Define the data structure using Pydantic
 class QuestionItem(BaseModel):

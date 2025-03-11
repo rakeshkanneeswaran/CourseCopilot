@@ -354,7 +354,7 @@ async def process_video_async(request, project_temp_dir, video_contents):
             "message": "Video Processing Completed",
         }
 
-        api_url = "http://localhost:3001/project/update/process-video"
+        api_url = os.getenv("Background_Job_URL")
 
         response = requests.post(api_url, json=data)
         logger.info("Processing completed successfully")

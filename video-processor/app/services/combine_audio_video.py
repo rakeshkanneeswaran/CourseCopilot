@@ -235,7 +235,7 @@ def generate_tts(video_path, language_code, language_name, ssml_gender, transcri
             except Exception as e:
                 print(f"Error removing temporary file {temp_file}: {str(e)}")
 
-        return final_output_path
+        return final_output_path, speed_factor
 
     except Exception as e:
         print(f"Error generating TTS: {str(e)}")
@@ -298,13 +298,49 @@ def combine_video_audio(
 
     try:
         # Generate TTS audio
-        audio_path = generate_tts(
+        audio_path, speed_factor = generate_tts(
             video_path, selected_code, selected_voice, gender, transcription
         )
 
         # Prepare FFmpeg command based on whether subtitles are provided
+        # if subtitle_path and os.path.exists(subtitle_path):
+        #     # FFmpeg command with subtitles
+        #     ffmpeg_command = [
+        #         "ffmpeg",
+        #         "-i",
+        #         video_path,  # Input video
+        #         "-i",
+        #         audio_path,  # Input audio
+        #         "-c:v",
+        #         "libx264",  # Video codec
+        #         "-c:a",
+        #         "aac",  # Audio codec
+        #         "-vf",
+        #         f"subtitles='{subtitle_path.replace('\\', '/')}'",  # Add subtitles
+        #         "-map",
+        #         "0:v",  # Map video stream
+        #         "-map",
+        #         "1:a",  # Map audio stream
+        #         "-shortest",  # Ensure output matches the shortest input
+        #         output_path,  # Output file
+        #     ]
+        # else:
+        #     # FFmpeg command without subtitles
+        #     ffmpeg_command = [
+        #         "ffmpeg",
+        #         "-i",
+        #         video_path,  # Input video
+        #         "-i",
+        #         audio_path,  # Input audio
+        #         "-c:v",
+        #         "copy",  # Copy video stream
+        #         "-c:a",
+        #         "aac",  # Audio codec
+        #         "-shortest",  # Ensure output matches the shortest input
+        #         output_path,  # Output file
+        #     ]
         if subtitle_path and os.path.exists(subtitle_path):
-            # FFmpeg command with subtitles
+    # FFmpeg command with subtitles and audio speed adjustment
             ffmpeg_command = [
                 "ffmpeg",
                 "-i",
@@ -315,6 +351,8 @@ def combine_video_audio(
                 "libx264",  # Video codec
                 "-c:a",
                 "aac",  # Audio codec
+                "-filter:a",
+                f"atempo={speed_factor}",  # Adjust audio speed
                 "-vf",
                 f"subtitles='{subtitle_path.replace('\\', '/')}'",  # Add subtitles
                 "-map",
@@ -325,7 +363,7 @@ def combine_video_audio(
                 output_path,  # Output file
             ]
         else:
-            # FFmpeg command without subtitles
+            # FFmpeg command without subtitles but with audio speed adjustment
             ffmpeg_command = [
                 "ffmpeg",
                 "-i",
@@ -336,10 +374,11 @@ def combine_video_audio(
                 "copy",  # Copy video stream
                 "-c:a",
                 "aac",  # Audio codec
+                "-filter:a",
+                f"atempo={speed_factor}",  # Adjust audio speed
                 "-shortest",  # Ensure output matches the shortest input
                 output_path,  # Output file
             ]
-
         # Execute the FFmpeg command
         try:
             subprocess.run(ffmpeg_command, check=True)
