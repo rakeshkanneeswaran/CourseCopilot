@@ -53,8 +53,6 @@
 #     uvicorn.run("main:app", host="0.0.0.0", port=3004, reload=True)
 
 
-
-
 from services.s3_service import S3Service
 from services.vector_store_service import VectorStoreService
 from services.llm_service import LLMService
@@ -108,13 +106,12 @@ async def websocket_endpoint(websocket: WebSocket, userId: str, projectId: str):
 async def generate_mcq(request_data: dict):
     userId = request_data.get("userId")
     projectId = request_data.get("projectId")
-    
+
     if not userId or not projectId:
         return JSONResponse(
-            status_code=400,
-            content={"error": "userId and projectId are required"}
+            status_code=400, content={"error": "userId and projectId are required"}
         )
-    
+
     # Check if vector store is already loaded
     if (userId, userId) not in active_vectore_stores:
         # Load from S3 if not available
@@ -125,11 +122,11 @@ async def generate_mcq(request_data: dict):
         active_vectore_stores[(userId, userId)] = vectorStore
     else:
         vectorStore = active_vectore_stores[(userId, userId)]
-    
+
     # Generate MCQs using the loaded vector store
     test_content = VectorStoreService.getContentForTestGeneration(vectorStore)
     mcq_answer = MCQService.generateMCQs(test_content)
-    
+
     # Return the raw mcq_answer which should already be in the correct format
     # from your MCQService (Pydantic -> dict conversion happens automatically)
     return mcq_answer

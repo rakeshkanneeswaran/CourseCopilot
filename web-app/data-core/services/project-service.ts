@@ -1,6 +1,7 @@
 import prismaClient from "@/data-core/database";
 import { S3Service } from "./aws/s3-service";
 import logger from "../utils/logger";
+import axios from "axios";
 
 interface VideoTranscriptMap {
     videoUrl: string,
@@ -249,8 +250,13 @@ export class ProjectService {
     static async getGetMcqQuestions({ projectId, userId }: { projectId: string, userId: string }): Promise<McqQuestions> {
         try {
             logger.info(`Fetching mcq questions for project: ${projectId} for user: ${userId}`);
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            return data;
+            if (process.env.NODE_ENV == 'development') {
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                return sampleData;
+            }
+            const data = await axios.post(`${process.env.MCQ_SERVICE_URL}`, { projectId, userId });
+            return data.data;
+
         } catch (error) {
             console.error('Error getting mcq questions:', error);
             throw new Error('Failed to get mcq questions');
@@ -261,7 +267,7 @@ export class ProjectService {
 
 
 
-const data = {
+const sampleData = {
     "questions": [
         {
             "question": "What do switches and routers do?",
