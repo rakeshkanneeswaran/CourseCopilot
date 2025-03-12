@@ -2,11 +2,27 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
+import MCQTest from "@/app/components/mcq-model";
 import {
   getOriginalContent,
   getContentForDifferentLanguage,
   getProjectDetails,
+  getMcqQuestions,
 } from "./action";
+
+interface McqQuestions {
+  questions: {
+    question: string;
+    options: {
+      A: string;
+      B: string;
+      C: string;
+      D: string;
+    };
+    correct_option: string;
+    explanation: string;
+  }[];
+}
 
 interface VideoTranscriptMap {
   videoUrl: string;
@@ -43,6 +59,8 @@ export default function Page() {
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const [mcqQuestions, setMcqQuestions] = useState<McqQuestions>();
+  const [isMcqPopupOpen, setIsMcqPopupOpen] = useState(false);
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -114,6 +132,21 @@ export default function Page() {
       }
     };
     fetchProjects();
+  }, [userId, projectId]);
+
+  useEffect(() => {
+    const fetchMcqQuestions = async () => {
+      try {
+        const questions = await getMcqQuestions({ userId, projectId });
+        console.log(questions);
+        setMcqQuestions(questions);
+      } catch (error) {
+        console.error("Error fetching MCQ questions", error);
+      }
+    };
+    if (userId && projectId) {
+      fetchMcqQuestions();
+    }
   }, [userId, projectId]);
 
   useEffect(() => {
@@ -254,6 +287,15 @@ export default function Page() {
         >
           Select Language
         </button>
+
+        {videoIndex === projectContent.length - 1 && (
+          <button
+            className="px-4 py-2 font-bold bg-[#c05e3c] text-white rounded-md"
+            onClick={() => setIsMcqPopupOpen(true)}
+          >
+            MCQ Test
+          </button>
+        )}
       </div>
 
       {/* Language Selection Modal */}
@@ -279,6 +321,21 @@ export default function Page() {
             >
               Cancel
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* MCQ Test */}
+      {isMcqPopupOpen && mcqQuestions && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className=" rounded-lg shadow-lg w-1/2 relative">
+            <button
+              className="absolute top-2 right-2 px-3 py-1 bg-red-500 text-white rounded-full"
+              onClick={() => setIsMcqPopupOpen(false)}
+            >
+              ✖
+            </button>
+            <MCQTest questions={mcqQuestions.questions} />
           </div>
         </div>
       )}

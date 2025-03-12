@@ -5,6 +5,22 @@ import logger from "../utils/logger";
 interface VideoTranscriptMap {
     videoUrl: string,
     transcriptUrl: string
+
+
+}
+
+interface McqQuestions {
+    questions: {
+        question: string,
+        options: {
+            A: string,
+            B: string,
+            C: string,
+            D: string
+        },
+        correct_option: string,
+        explanation: string
+    }[]
 }
 
 export class ProjectService {
@@ -230,7 +246,132 @@ export class ProjectService {
 
     }
 
+    static async getGetMcqQuestions({ projectId, userId }: { projectId: string, userId: string }): Promise<McqQuestions> {
+        try {
+            logger.info(`Fetching mcq questions for project: ${projectId} for user: ${userId}`);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            return data;
+        } catch (error) {
+            console.error('Error getting mcq questions:', error);
+            throw new Error('Failed to get mcq questions');
+        }
+    }
+
 }
 
 
 
+const data = {
+    "questions": [
+        {
+            "question": "What do switches and routers do?",
+            "options": {
+                "A": "They help you surf the internet",
+                "B": "They control traffic flow in a network",
+                "C": "They connect devices to the internet",
+                "D": "They provide public IP addresses"
+            },
+            "correct_option": "B",
+            "explanation": "Routers and switches are used to manage traffic flow in a network, allowing devices to communicate with each other."
+        },
+        {
+            "question": "What can a router do instead of a switch?",
+            "options": {
+                "A": "It can assign public IP addresses",
+                "B": "It can connect devices to the internet",
+                "C": "It can manage traffic flow in a network",
+                "D": "It can provide modem services"
+            },
+            "correct_option": "A",
+            "explanation": "A router can assign public IP addresses to devices on your network, whereas a switch only connects devices together."
+        },
+        {
+            "question": "What type of internet connection does a router use?",
+            "options": {
+                "A": "Cable",
+                "B": "DSL",
+                "C": "Fiber Optic",
+                "D": "Satellite"
+            },
+            "correct_option": "B",
+            "explanation": "A router typically uses DSL or cable internet connections to connect devices to the internet."
+        },
+        {
+            "question": "What is used in small organizations or homes?",
+            "options": {
+                "A": "Class A IP addresses",
+                "B": "Class B IP addresses",
+                "C": "Class C IP addresses",
+                "D": "Public IP addresses"
+            },
+            "correct_option": "C",
+            "explanation": "Class C IP addresses are used in small organizations or homes, and are the most commonly used IP address range."
+        },
+        {
+            "question": "Who assigns public IP addresses?",
+            "options": {
+                "A": "Router",
+                "B": "Switch",
+                "C": "Modem",
+                "D": "Techie people"
+            },
+            "correct_option": "C",
+            "explanation": "The modem or router in your home or business is typically responsible for assigning public IP addresses."
+        },
+        {
+            "question": "What is an IP address?",
+            "options": {
+                "A": "An identifier for a computer on the internet",
+                "B": "A type of network cable",
+                "C": "A device that connects computers to the internet",
+                "D": "A type of modem"
+            },
+            "correct_option": "A",
+            "explanation": "An IP address is an identifier for a computer or device on the internet."
+        },
+        {
+            "question": "What do computers use to share information?",
+            "options": {
+                "A": "Network cables",
+                "B": "Internet connections",
+                "C": "IP addresses",
+                "D": "Public IP addresses"
+            },
+            "correct_option": "C",
+            "explanation": "Computers use IP addresses to share information with each other."
+        },
+        {
+            "question": "What is a public IP address?",
+            "options": {
+                "A": "An identifier for a computer on the internet",
+                "B": "A type of network cable",
+                "C": "A device that connects computers to the internet",
+                "D": "A unique number assigned by a router"
+            },
+            "correct_option": "A",
+            "explanation": "A public IP address is an identifier for a computer or device on the internet."
+        },
+        {
+            "question": "Why do devices need IP addresses?",
+            "options": {
+                "A": "To connect to the internet",
+                "B": "To share information with each other",
+                "C": "To provide modem services",
+                "D": "To manage traffic flow in a network"
+            },
+            "correct_option": "B",
+            "explanation": "Devices need IP addresses so they can share information with each other."
+        },
+        {
+            "question": "What is the device that provides modem services?",
+            "options": {
+                "A": "Router",
+                "B": "Switch",
+                "C": "Modem",
+                "D": "Network cable"
+            },
+            "correct_option": "C",
+            "explanation": "The device that provides modem services is typically a modem, which connects devices to the internet."
+        }
+    ]
+}
