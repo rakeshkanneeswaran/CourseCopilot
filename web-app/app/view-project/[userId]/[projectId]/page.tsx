@@ -71,14 +71,19 @@ export default function Page() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (ws) {
-      ws.send(inputValue);
+      ws.send(JSON.stringify({ request_type: "query", query: inputValue }));
     }
     setInputValue("");
   };
 
   useEffect(() => {
+    console.log(
+      `${process.env.NEXT_PUBLIC_AI_WEB_SOCKET_URL!}/${userId}/${projectId}`
+    );
+    console.log(`${process.env.NEXT_PUBLIC_LODALASEN!}/${userId}/${projectId}`);
+
     const socket = new WebSocket(
-      `ws://localhost:3004/ws/${userId}/${projectId}`
+      `${process.env.NEXT_PUBLIC_AI_WEB_SOCKET_URL!}/${userId}/${projectId}`
     );
     socket.onopen = () => {
       console.log("Connected to server");

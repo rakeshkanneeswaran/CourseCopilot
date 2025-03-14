@@ -1,11 +1,14 @@
-from langchain_ollama import OllamaEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 from services.file_service import FileService
 import json
 import os
 
-embeddings = OllamaEmbeddings(model="llama3")
+model_name = "BAAI/bge-small-en"
+
+
+embeddings = HuggingFaceBgeEmbeddings(model_name=model_name)
 
 text_splitter = RecursiveCharacterTextSplitter(
     # Set a really small chunk size, just to show.
@@ -26,15 +29,15 @@ class EmbeddingService:
 
     @staticmethod
     def saveVectorStore(vectorstore, path):
-    # Create directory if it does not exist
-     if not os.path.exists(path):
-        os.makedirs(path)
-        print(f"Directory created at: {path}")
-     else:
-        print(f"Directory already exists at: {path}")
-    
-     print("Saving vectorstore at path:", path)
-     vectorstore.save_local(path)
+        # Create directory if it does not exist
+        if not os.path.exists(path):
+            os.makedirs(path)
+            print(f"Directory created at: {path}")
+        else:
+            print(f"Directory already exists at: {path}")
+
+        print("Saving vectorstore at path:", path)
+        vectorstore.save_local(path)
 
     @staticmethod
     def loadVectorStore(path):

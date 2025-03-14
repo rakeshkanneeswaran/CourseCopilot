@@ -8,3 +8,4 @@ fastapi
 uvicorn
 uvicorn[standard]
 faiss-cpu
+sentence-transformers

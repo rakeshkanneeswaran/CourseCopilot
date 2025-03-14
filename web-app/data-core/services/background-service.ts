@@ -21,7 +21,8 @@ export class BackgroundService {
 
 
             logger.debug('sending request to background-job to process videos', projectId);
-            const response = await axios.post(process.env.VIDEO_PROCESSOR_URL!, {
+            console.log("this is video processing ur", process.env.BACKGROUND_JOB_URL!)
+            const response = await axios.post(process.env.BACKGROUND_JOB_URL!, {
                 userId, projectId, projectMetaData, serviceName: "WebApp", message: "process video"
             });
 

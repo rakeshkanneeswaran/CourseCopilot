@@ -1,9 +1,12 @@
 from langchain_community.vectorstores import FAISS
-from langchain_ollama import OllamaEmbeddings
+from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 import random
 
 
-embeddings = OllamaEmbeddings(model="llama3")
+model_name = "BAAI/bge-small-en"
+
+
+embeddings = HuggingFaceBgeEmbeddings(model_name=model_name)
 
 
 class VectorStoreService:

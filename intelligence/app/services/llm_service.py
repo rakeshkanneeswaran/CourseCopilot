@@ -1,25 +1,24 @@
-from langchain_ollama.llms import OllamaLLM
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
-
-import os
 from langchain_openai import ChatOpenAI
+import os
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 LLM_PROVIDER = os.getenv("openai", "local").lower()
 
 # Initialize the LLM based on the environment variable
-#3 seconds response time
-if LLM_PROVIDER == "openai":
-    llm = ChatOpenAI(
-        model="gpt-4o-mini",
-        temperature=0,
-        max_tokens=None,
-        timeout=None,
-        max_retries=2,
-    )
-else:
-    #4 seconds response time
-    llm = OllamaLLM(model="llama3")
+# 3 seconds response time
+llm = ChatOpenAI(
+    model="gpt-4o-mini",
+    temperature=0,
+    max_tokens=None,
+    timeout=None,
+    max_retries=2,
+    api_key=os.getenv("OPENAI_API_KEY"),
+)
 
 prompt = PromptTemplate(
     input_variables=["context", "query"],

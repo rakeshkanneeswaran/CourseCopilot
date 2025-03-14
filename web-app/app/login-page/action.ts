@@ -3,7 +3,9 @@ import { AuthenticationService } from "@/data-core/services/authentication-servi
 
 export async function userLogin({ username, password }: { username: string, password: string }) {
     try {
+
         const result = await AuthenticationService.signIn(username, password)
+        console.log("this the value of result", result);
         return result
 
     } catch (error) {

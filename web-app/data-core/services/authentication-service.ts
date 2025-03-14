@@ -9,7 +9,9 @@ export class AuthenticationService {
             if (!userId) {
                 throw new Error('Invalid credentials');
             }
+            console.log("starting to creata token", userId);
             const token = jwt.sign({ userId }, process.env.JWT_SECRET!)
+            console.log("this the value of toknen", token);
             return {
                 token,
                 userId

@@ -35,11 +35,14 @@ export default function LoginPage() {
     setIsSubmitting(true);
 
     try {
+      console.log("calling userLogin");
       const result = await userLogin({
         username: formData.email,
         password: formData.password,
       });
       if (result.token) {
+        console.log("setting token in local storage");
+        console.log("this is the value of token", result.token);
         localStorage.setItem("token", result.token);
         router.push(`/dashboard`);
       }

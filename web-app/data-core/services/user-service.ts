@@ -58,11 +58,16 @@ export class UserService {
     static async findUserByCredentials({ username, password }: { username: string, password: string }) {
         try {
             logger.debug(`Finding user by credentials: ${username}`);
+            console.log(`Finding user by credentials: ${username}`);
+            console.log(process.env.DATABASE_URL);
 
             const userExist = await prismaClient.credentials.findUnique({
                 where: { username, password },
                 select: { User: true }
             });
+
+            logger.info(`User found: ${userExist?.User?.id}`);
+            console.log(`User found: ${userExist?.User?.id}`);
 
             if (!userExist?.User) {
                 logger.warn(`User not found for credentials: ${username}`);

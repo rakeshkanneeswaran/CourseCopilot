@@ -8,6 +8,11 @@ dotenv.config();
 const fastify = Fastify();
 
 
+fastify.get("/healthz", async (request, reply) => {
+    return { status: "ok" };
+})
+
+
 fastify.post("/project/process", async (request, reply) => {
     try {
         const data = request.body as ProcessProjectRequest;
@@ -85,13 +90,13 @@ fastify.post("/update/vectorstore/", async (request, reply) => {
         const data = request.body as UpdateVectorStoreRequest
         console.log(data)
         if (data.processStatus == 'COMPLETED') {
-            const requestToWebApp = await axios.post(process.env.WEB_APP_URL!, {projectId : data.projectId ,processStatus : data.processStatus });
+            const requestToWebApp = await axios.post(process.env.WEB_APP_URL!, { projectId: data.projectId, processStatus: data.processStatus });
             if (requestToWebApp.status === 200) {
                 console.log('Project process status updated');
             }
         }
         else {
-            const requestToWebApp = await axios.post(process.env.WEB_APP_URL!, {projectId : data.projectId ,processStatus : 'FAILED' });
+            const requestToWebApp = await axios.post(process.env.WEB_APP_URL!, { projectId: data.projectId, processStatus: 'FAILED' });
             if (requestToWebApp.status === 200) {
                 console.log('Project process status updated');
             }
@@ -106,12 +111,13 @@ fastify.post("/update/vectorstore/", async (request, reply) => {
 
 const start = async () => {
     try {
-        await fastify.listen({ port: 3001 });
-        console.log("🚀 Server is running on http://localhost:3001");
+        await fastify.listen({ port: 3001, host: "0.0.0.0" });
+        console.log("🚀 Server is running on http://0.0.0.0:3001");
     } catch (err) {
         fastify.log.error(err);
         process.exit(1);
     }
 };
+
 
 start();
