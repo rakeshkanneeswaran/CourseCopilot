@@ -376,9 +376,9 @@ async def process_video_async(request, project_temp_dir, video_contents):
             detail=f"Error processing video: {str(e)}",
         )
 
-
 if __name__ == "__main__":
-    uvicorn.run(app="main:app", port=3002, reload=True)
+    import uvicorn
+    uvicorn.run(app="main:app", host="0.0.0.0", port=3002,reload=True)
 
 # @app.post("/process-video")
 # async def process_video(request: ProcessVideoRequest, background_tasks: BackgroundTasks):

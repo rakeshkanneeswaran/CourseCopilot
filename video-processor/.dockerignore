@@ -1,0 +1,17 @@
+myenv
+.env
+.venv
+legacy
+venv
+node_modules
+__pycache__
+venv/
+.git/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.env
+*.log
+*.tmp
+*.cache

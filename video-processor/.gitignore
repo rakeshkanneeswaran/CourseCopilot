@@ -3,3 +3,9 @@ video-processor/phase_1/utils/__pycache__/
 video-processor/phase_1/utils/.ipynb_checkpoints/
 temp
 myenv
+.json
+.env
+venv
+.venv
+application_default_credentials.json
+docker.env
