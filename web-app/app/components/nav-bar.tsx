@@ -64,7 +64,7 @@ export default function App() {
         </NavbarItem>
       </NavbarContent>
       <NavbarContent justify="end">
-        {token ? (
+        {token == "" ? (
           <NavbarItem>
             <Button
               onPress={() => {
@@ -79,9 +79,15 @@ export default function App() {
           </NavbarItem>
         ) : (
           <NavbarItem>
-            <Link href="/login" className="">
+            <Button
+              onPress={() => {
+                setToken("");
+                window.location.href = "/login";
+              }}
+              className=""
+            >
               Login
-            </Link>
+            </Button>
           </NavbarItem>
         )}
       </NavbarContent>
