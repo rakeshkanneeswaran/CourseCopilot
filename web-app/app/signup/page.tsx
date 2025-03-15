@@ -33,7 +33,7 @@ export default function SignupPage() {
     try {
       await userSignup(formData);
       setSuccess("Signup successful!");
-      router.push(`/login-page`);
+      router.push(`/login`);
     } catch (err) {
       setError("Signup failed. Please try again.");
       console.log(err);
@@ -42,10 +42,10 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen p-5 bg-white">
-      <div className="w-full max-w-md p-8 rounded-lg border border-black bg-white shadow-lg">
+    <div className="flex justify-center items-center min-h-screen p-5 bg-[#faf8f4]">
+      <div className="w-full max-w-md p-8 rounded-lg border border-black via-[#edd7cb] shadow-lg">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-violet-500 via-pink-500 to-red-500 text-transparent bg-clip-text mb-2">
+          <h1 className="text-2xl font-bold bg-black text-transparent bg-clip-text mb-2">
             Create Your Account
           </h1>
           <p className="text-gray-700">Join us today!</p>
@@ -60,7 +60,7 @@ export default function SignupPage() {
               value={formData.name}
               onChange={handleChange}
               placeholder="Enter your name"
-              className="w-full px-4 py-3 rounded-md border-2 text-black border-gray-300 focus:outline-none focus:border-violet-500 transition duration-300"
+              className="w-full px-4 py-3 rounded-md border-2 text-black border-gray-300 focus:outline-none focus:border-black transition duration-300"
             />
           </div>
 
@@ -74,7 +74,7 @@ export default function SignupPage() {
               value={formData.username}
               onChange={handleChange}
               placeholder="Enter your email"
-              className="w-full px-4 py-3 rounded-md border-2 text-black border-gray-300 focus:outline-none focus:border-violet-500 transition duration-300"
+              className="w-full px-4 py-3 rounded-md border-2 text-black border-gray-300 focus:outline-none focus:border-black transition duration-300"
             />
           </div>
 
@@ -88,14 +88,14 @@ export default function SignupPage() {
               value={formData.password}
               onChange={handleChange}
               placeholder="Enter your password"
-              className="w-full px-4 py-3 rounded-md border-2 text-black border-gray-300 focus:outline-none focus:border-violet-500 transition duration-300"
+              className="w-full px-4 py-3 rounded-md border-2 text-black border-gray-300 focus:outline-none focus:border-black transition duration-300"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="py-3 px-4 rounded-md font-semibold text-white transition duration-300 bg-gradient-to-r from-violet-500 via-pink-500 to-red-500 hover:opacity-90"
+            className="py-3 px-4 rounded-md font-semibold text-white transition duration-300 bg-black hover:opacity-90"
           >
             {loading ? "Signing Up..." : "Sign Up"}
           </button>
@@ -106,8 +106,8 @@ export default function SignupPage() {
           <div className="mt-6 text-center text-sm text-gray-700">
             Already have an account?{" "}
             <a
-              href="#"
-              className="text-violet-500 font-semibold hover:opacity-80 transition duration-300"
+              href="/login"
+              className="text-black font-semibold hover:opacity-80 transition duration-300"
             >
               Sign in
             </a>

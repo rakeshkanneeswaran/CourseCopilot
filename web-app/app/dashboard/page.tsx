@@ -23,7 +23,7 @@ const DashboardPage = () => {
     const fetchUserId = async () => {
       const token = localStorage.getItem("token");
       if (!token) {
-        router.push("/login-page");
+        router.push("/login");
         return;
       }
 

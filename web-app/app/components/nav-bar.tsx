@@ -79,7 +79,7 @@ export default function App() {
           </NavbarItem>
         ) : (
           <NavbarItem>
-            <Link href="/login-page" className="">
+            <Link href="/login" className="">
               Login
             </Link>
           </NavbarItem>

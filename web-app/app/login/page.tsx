@@ -54,10 +54,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen p-5 bg-white">
-      <div className="w-full max-w-md p-8 rounded-lg border border-black bg-white shadow-lg">
+    <div className="flex justify-center items-center min-h-screen p-5 bg-[#faf8f4]">
+      <div className="w-full max-w-md p-8 rounded-lg border border-black via-[#edd7cb] shadow-lg">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-violet-500 via-pink-500 to-red-500 text-transparent bg-clip-text mb-2">
+          <h1 className="text-2xl font-bold bg-black text-transparent bg-clip-text mb-2">
             Welcome Back
           </h1>
           <p className="text-gray-700">Please sign in to continue</p>
@@ -80,7 +80,7 @@ export default function LoginPage() {
               placeholder="Enter your email"
               className={`w-full px-4 py-3 rounded-md border-2 text-black ${
                 errors.email ? "border-red-500" : "border-gray-300"
-              } focus:outline-none focus:border-violet-500 transition duration-300`}
+              } focus:outline-none focus:border-black transition duration-300`}
             />
             {errors.email && (
               <span className="text-red-500 text-sm mt-1 block">
@@ -105,7 +105,7 @@ export default function LoginPage() {
               placeholder="Enter your password"
               className={`w-full px-4 py-3 rounded-md border-2 text-black ${
                 errors.password ? "border-red-500" : "border-gray-300"
-              } focus:outline-none focus:border-violet-500 transition duration-300`}
+              } focus:outline-none focus:border-black transition duration-300`}
             />
             {errors.password && (
               <span className="text-red-500 text-sm mt-1 block">
@@ -117,7 +117,7 @@ export default function LoginPage() {
           <div className="text-right mb-5">
             <a
               href="#"
-              className="text-violet-500 text-sm hover:opacity-80 transition duration-300"
+              className="text-black text-sm hover:opacity-80 transition duration-300"
             >
               Forgot password?
             </a>
@@ -125,7 +125,7 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className={`py-3 px-4 rounded-md font-semibold text-white transition duration-300 bg-gradient-to-r from-violet-500 via-pink-500 to-red-500 hover:opacity-90 ${
+            className={`py-3 px-4 rounded-md font-semibold text-white transition duration-300 bg-black hover:opacity-90 ${
               isSubmitting ? "opacity-60 cursor-not-allowed" : ""
             }`}
             disabled={isSubmitting}
@@ -136,8 +136,8 @@ export default function LoginPage() {
           <div className="mt-6 text-center text-sm text-gray-700">
             Do not have an account?{" "}
             <a
-              href="#"
-              className="text-violet-500 font-semibold hover:opacity-80 transition duration-300"
+              href="/signup"
+              className="text-black font-semibold hover:opacity-80 transition duration-300"
             >
               Sign up
             </a>
