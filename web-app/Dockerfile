@@ -17,7 +17,7 @@ ARG NEXT_PUBLIC_AI_WEB_SOCKET_URL
 ENV NEXT_PUBLIC_AI_WEB_SOCKET_URL=${NEXT_PUBLIC_AI_WEB_SOCKET_URL}
 
 # Generate Prisma client
-RUN pnpm exec prisma generate --schema ./data-core/database/prisma/schema.prisma
+RUN pnpm exec prisma generate --schema ./data-core/database 
 
 # Build the project (this will replace NEXT_PUBLIC_ variables in the built files)
 RUN pnpm build
