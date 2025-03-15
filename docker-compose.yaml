@@ -1,0 +1,30 @@
+version: '3.9'
+
+services:
+  web-app:
+    build: 
+      context: ./web-app
+      args:
+        NEXT_PUBLIC_AI_WEB_SOCKET_URL: ws://localhost:3004/ws
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./web-app/docker.env
+
+  intelligence-services:
+    build:
+      context: ./intelligence
+    ports:
+        - "3004:3004"
+    env_file:
+        - ./intelligence/docker.env
+
+  embedded-services:
+    build:
+      context: ./embedding-service
+    ports:
+        - "3003:3003"
+    env_file:
+        - ./embedding-service/docker.env 
+
+
