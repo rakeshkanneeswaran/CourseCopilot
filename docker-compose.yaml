@@ -36,4 +36,10 @@ services:
     env_file:
         - ./embedding-service/docker.env 
 
-
+  video-processing-services:
+    build:
+      context: ./video-processor
+    ports:
+        - "3002:3002"
+    env_file:
+        - ./video-processor/docker.env      
