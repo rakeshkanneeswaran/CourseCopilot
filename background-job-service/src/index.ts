@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import Fastify from "fastify";
 import { ProcessVideoReponse, UpdateProjectVideoStatusRequest, UpdateVectorStoreRequest } from "./types";
-import { ProcessProjectRequest, ProjectEmbeddingRequest } from "@course-copilot/shared-types";
+import { ProcessProjectRequest, ProjectEmbeddingRequest, UpdateProjectStatus } from "@course-copilot/shared-types";
 import axios from "axios";
 import { transformRequestFromWebApp } from "./utils";
 dotenv.config();
@@ -53,7 +53,18 @@ fastify.post("/project/update/process-video", async (request, reply) => {
         const data = request.body as UpdateProjectVideoStatusRequest
         console.log(`Received request for userId : ${data.userId} projectId : ${data.projectId} from ${data.serviceName} with message ${data.message}`);
         if (data.status !== 200) {
-            const requestToWebApp = await axios.post(process.env.WEB_APP_URL!, { projectId: data.projectId, status: "FAILED" });
+            const payloadToWebApp: UpdateProjectStatus = {
+                eventType: 'UPDATE PROJECT STATUS',
+                timestamp: new Date().toISOString(),
+                serviceName: 'background-job',
+                message: "Project process failed at video processing",
+                projectMetaData: {
+                    userId: data.userId,
+                    projectId: data.projectId,
+                    projectStatus: 'FAILED'
+                }
+            }
+            const requestToWebApp = await axios.post(process.env.WEB_APP_URL!, payloadToWebApp);
             if (requestToWebApp.status === 200) {
                 console.log('Project status updated');
             }
@@ -92,19 +103,43 @@ fastify.post("/update/vectorstore/", async (request, reply) => {
         const data = request.body as UpdateVectorStoreRequest
         console.log(data)
         if (data.processStatus == 'COMPLETED') {
-            const requestToWebApp = await axios.post(process.env.WEB_APP_URL!, { projectId: data.projectId, processStatus: data.processStatus });
+            const payloadToWebApp: UpdateProjectStatus = {
+                eventType: 'UPDATE PROJECT STATUS',
+                timestamp: new Date().toISOString(),
+                serviceName: 'background-job',
+                message: "Project process completed",
+                projectMetaData: {
+                    userId: data.userId,
+                    projectId: data.projectId,
+                    projectStatus: 'COMPLETED'
+                }
+            }
+            const requestToWebApp = await axios.post(process.env.WEB_APP_URL!, payloadToWebApp);
             if (requestToWebApp.status === 200) {
                 console.log('Project process status updated');
             }
         }
         else {
-            const requestToWebApp = await axios.post(process.env.WEB_APP_URL!, { projectId: data.projectId, processStatus: 'FAILED' });
+            const payloadToWebApp: UpdateProjectStatus = {
+                eventType: 'UPDATE PROJECT STATUS',
+                timestamp: new Date().toISOString(),
+                serviceName: 'background-job',
+                message: "Project process failed at embedding service",
+                projectMetaData: {
+                    userId: data.userId,
+                    projectId: data.projectId,
+                    projectStatus: 'FAILED'
+                }
+            }
+            const requestToWebApp = await axios.post(process.env.WEB_APP_URL!, payloadToWebApp);
             if (requestToWebApp.status === 200) {
                 console.log('Project process status updated');
             }
         }
 
     } catch (error) {
+        console.log(error)
+        throw error
 
     }
 

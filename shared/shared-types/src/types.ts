@@ -23,3 +23,16 @@ export interface ProjectEmbeddingRequest {
         projectId: string;
     };
 }
+
+
+export interface UpdateProjectStatus {
+    eventType: string;
+    timestamp: string;
+    serviceName: string;
+    message: string;
+    projectMetaData: {
+        userId: string;
+        projectId: string;
+        projectStatus: string;
+    };
+}

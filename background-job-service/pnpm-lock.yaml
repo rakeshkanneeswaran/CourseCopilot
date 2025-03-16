@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@course-copilot/shared-types':
-        specifier: ^1.0.6
-        version: 1.0.6
+        specifier: ^1.0.7
+        version: 1.0.7
       axios:
         specifier: ^1.8.1
         version: 1.8.1
@@ -36,8 +36,8 @@ importers:
 
 packages:
 
-  '@course-copilot/shared-types@1.0.6':
-    resolution: {integrity: sha512-pIcz1gTymIdK5EDf0Ptr9FSqYYeSNnNFRuWqg+e17DhJ6kxcOREarSU6QsSbotCLQkC9ri1ebYg50YNMfdEqSA==}
+  '@course-copilot/shared-types@1.0.7':
+    resolution: {integrity: sha512-8SRsHMW++OI1rV0mP2QwoD+g1nrUaoYJn9cW9oytCPdbK5o/5HlHSne+7oX/lu59hZJCdHnswmpbyuzOGQFEtw==}
 
   '@esbuild/aix-ppc64@0.25.0':
     resolution: {integrity: sha512-O7vun9Sf8DFjH2UtqK8Ku3LkquL9SZL8OLY1T5NZkA34+wG3OQF7cl4Ql8vdNzM6fzBbYfLaiRLIOZ+2FOCgBQ==}
@@ -484,7 +484,7 @@ packages:
 
 snapshots:
 
-  '@course-copilot/shared-types@1.0.6': {}
+  '@course-copilot/shared-types@1.0.7': {}
 
   '@esbuild/aix-ppc64@0.25.0':
     optional: true

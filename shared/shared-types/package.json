@@ -1,6 +1,6 @@
 {
   "name": "@course-copilot/shared-types",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "",
   "main": "dist/types.d.ts",
   "types": "dist/types.d.ts",
