@@ -19,10 +19,10 @@ app = FastAPI()
 async def main(request: Request, background_tasks: BackgroundTasks):
     try:
         data = await request.json()
-        userId = data["userId"]
-        projectId = data["projectId"]
+        userId = data["projectMetaData"]["userId"]
+        projectId = data["projectMetaData"]["projectId"]
         print(
-            f"Received request for userId: {data['userId']} , projectId : {data['projectId']} from {data['serviceName']} with message {data['message']}"
+            f"Received request from  {data['serviceName']} for userId: {userId} and projectId: {projectId} with message {data['message']} at {data['timestamp']}"
         )
         if not (userId and projectId):
             return {"status": 400, "message": "userId and projectId are required"}

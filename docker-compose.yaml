@@ -12,23 +12,23 @@ services:
       - ./web-app/docker.env
 
 
-  background-job-services:
+  background-job-service:
      build:
-        context: ./background-job
+        context: ./background-job-service
      ports:
           - "3001:3001"
      env_file:
-          - ./background-job/docker.env   
+          - ./background-job-service/docker.env   
 
-  intelligence-services:
+  intelligence-service:
     build:
-      context: ./intelligence
+      context: ./intelligence-service
     ports:
         - "3004:3004"
     env_file:
-        - ./intelligence/docker.env
+        - ./intelligence-service/docker.env
 
-  embedding-services:
+  embedding-service:
     build:
       context: ./embedding-service
     ports:
@@ -36,10 +36,10 @@ services:
     env_file:
         - ./embedding-service/docker.env 
 
-  video-processing-services:
+  video-processing-service:
     build:
-      context: ./video-processor
+      context: ./video-processing-service
     ports:
         - "3002:3002"
     env_file:
-        - ./video-processor/docker.env      
+        - ./video-processing-service/docker.env      

@@ -55,10 +55,7 @@ class EmbeddingService:
     @staticmethod
     def load_json_file_and_transform(file_path):
         filesArray = FileService.list_files(file_path)
-        print("this the files array", filesArray)
-        print("this is file path", file_path)
         text = ""
-
         for file in filesArray:
             with open(file, "r") as f:
                 data = json.load(f)

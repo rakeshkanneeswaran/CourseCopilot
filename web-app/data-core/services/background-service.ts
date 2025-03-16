@@ -1,6 +1,7 @@
 import { ProjectService } from "./project-service";
 import axios from "axios";
 import logger from "../utils/logger";
+import { ProcessProjectRequest } from "@course-copilot/shared-types";
 
 interface ProjectMetaData {
     generate_translate: boolean;
@@ -22,9 +23,19 @@ export class BackgroundService {
 
             logger.debug('sending request to background-job to process videos', projectId);
             console.log("this is video processing ur", process.env.BACKGROUND_JOB_URL!)
-            const response = await axios.post(process.env.BACKGROUND_JOB_URL!, {
-                userId, projectId, projectMetaData, serviceName: "WebApp", message: "process video"
-            });
+
+            const payload: ProcessProjectRequest = {
+                eventType: "PROCESS_PROJECT",
+                timestamp: new Date().toISOString(),
+                serviceName: "WebApp",
+                message: "process video request from webapp",
+                projectMetaData: {
+                    userId,
+                    projectId,
+                    ...projectMetaData
+                }
+            }
+            const response = await axios.post(process.env.BACKGROUND_JOB_URL!, payload);
 
             if (response.data.status != 200 || response.data.received != true) {
                 logger.error('Failed to initiate background process , marking the project status to FAILED');

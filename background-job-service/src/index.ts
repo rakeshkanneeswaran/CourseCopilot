@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import Fastify from "fastify";
-import { ProcessProjectRequest, ProcessVideoReponse, UpdateProjectVideoStatusRequest, UpdateVectorStoreRequest } from "./types";
+import { ProcessVideoReponse, UpdateProjectVideoStatusRequest, UpdateVectorStoreRequest } from "./types";
+import { ProcessProjectRequest, ProjectEmbeddingRequest } from "@course-copilot/shared-types";
 import axios from "axios";
 import { transformRequestFromWebApp } from "./utils";
 dotenv.config();
@@ -16,13 +17,13 @@ fastify.get("/healthz", async (request, reply) => {
 fastify.post("/project/process", async (request, reply) => {
     try {
         const data = request.body as ProcessProjectRequest;
-        console.log(data)
-        console.log(`Received request from service: "${data.serviceName}" to perform: "${data.message}"`);
+        console.log(
+            `Received request from service: '${data.serviceName}' with message: '${data.message}' at ${data.timestamp}`
+        );
         const dataToVideoProcessor = transformRequestFromWebApp(data);
-        console.log("Data to video processor", dataToVideoProcessor);
+        console.log("Sending request to video processor with data", dataToVideoProcessor);
         const requestToVideoProcessor = await axios.post(process.env.VIDEO_PROCESSOR_URL!, dataToVideoProcessor);
         const responseFromVideoProcessor = requestToVideoProcessor.data as ProcessVideoReponse;
-        console.log("Response from video processor", responseFromVideoProcessor);
         if (responseFromVideoProcessor.received) {
             return {
                 received: true,
@@ -40,12 +41,9 @@ fastify.post("/project/process", async (request, reply) => {
             status: 400,
         };
     } catch (error) {
-
         console.log(error);
         throw error;
     }
-
-
 
 });
 
@@ -61,11 +59,15 @@ fastify.post("/project/update/process-video", async (request, reply) => {
             }
         }
         console.log("trying to send request to embedding service with data", data);
-        const dataForEmbeddingService = {
-            userId: data.userId,
-            projectId: data.projectId,
-            serviceName: "backgournd-job",
-            message: "create embedding"
+        const dataForEmbeddingService: ProjectEmbeddingRequest = {
+            message: "Request to embedding service from background-job",
+            eventType: "PROCESS EMBEDDING",
+            timestamp: new Date().toISOString(),
+            serviceName: "background-job",
+            projectMetaData: {
+                projectId: data.projectId,
+                userId: data.userId,
+            }
 
         }
         const requestToEmbeddingService = await axios.post(process.env.EMBEDDING_SERVICE_URL!, dataForEmbeddingService);
