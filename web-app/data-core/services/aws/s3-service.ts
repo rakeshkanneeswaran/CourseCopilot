@@ -209,4 +209,25 @@ export class S3Service {
             throw new Error('Failed to create pre-signed URL for the file');
         }
     }
+
+    static async uploadProjectThumbnail({ projectId, userId, thumbnail }: { projectId: string, userId: string, thumbnail: File }) {
+        try {
+            const fileExtension = thumbnail.name.split('.').pop();
+            const fileName = `thumbnail.${fileExtension}`;
+            const key = `${userId}/${projectId}/thumbnails/${fileName}`;
+            const bucket = process.env.VIDEO_BUCKET_NAME!;
+            const fileBuffer = await thumbnail.arrayBuffer();
+            const params = {
+                Bucket: bucket, // Your S3 bucket name
+                Key: key,
+                Body: Buffer.from(fileBuffer),
+                ContentType: thumbnail.type, // Set the file type
+            };
+            const command = new PutObjectCommand(params);
+            await s3.send(command);
+        } catch (error) {
+            logger.error(`Failed to upload project thumbnail to S3: ${error}`, { userId, projectId });
+            throw new Error('Failed to upload project thumbnail to S3');
+        }
+    }
 }

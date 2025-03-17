@@ -263,6 +263,17 @@ export class ProjectService {
         }
     }
 
+    static async uploadPojectThumbnail({ userId, projectId, thumbnail }: { userId: string, projectId: string, thumbnail: File }) {
+        try {
+            logger.info(`Uploading thumbnail for project: ${projectId} for user: ${userId}`);
+            const result = await S3Service.uploadProjectThumbnail({ userId, projectId, thumbnail });
+            return result;
+        } catch (error) {
+            logger.error(`Error uploading project thumbnail for project: ${projectId} for user: ${userId}`, error);
+            throw new Error('Failed to upload project thumbnail');
+        }
+    }
+
 }
 
 
