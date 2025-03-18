@@ -10,3 +10,13 @@ export async function createProject({ userId, title, description }: { userId: st
         throw Error("Error creating project")
     }
 }
+
+export async function uploadProjectThumbnail({ userId, projectId, thumbnail }: { userId: string, projectId: string, thumbnail: File }) {
+    try {
+        const result = await ProjectService.uploadPojectThumbnail({ userId, projectId, thumbnail })
+        return result
+    } catch (error) {
+        console.error('Error uploading project thumbnail:', error);
+        throw Error("Error uploading project thumbnail")
+    }
+}
