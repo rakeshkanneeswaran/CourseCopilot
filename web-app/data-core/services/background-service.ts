@@ -1,5 +1,5 @@
 import { ProjectService } from "./project-service";
-import axios from "axios";
+import { KafkaService } from "./kafka-service";
 import logger from "../utils/logger";
 import { ProcessProjectRequest } from "@course-copilot/shared-types";
 
@@ -35,13 +35,8 @@ export class BackgroundService {
                     ...projectMetaData
                 }
             }
-            const response = await axios.post(process.env.BACKGROUND_JOB_URL!, payload);
-
-            if (response.data.status != 200 || response.data.received != true) {
-                logger.error('Failed to initiate background process , marking the project status to FAILED');
-                await ProjectService.updateProjectStatus(projectId, 'FAILED')
-            }
-            return true
+            const resposne = await KafkaService.sendMessageToKafka('process-project', JSON.stringify(payload))
+            return resposne
         } catch (error) {
             logger.error('Failed to initiate background process', error);
             await ProjectService.deleteProject({ userId, projectId })

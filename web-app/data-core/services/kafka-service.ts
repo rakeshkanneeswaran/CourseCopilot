@@ -1,4 +1,4 @@
-import { Kafka } from "kafkajs";
+import { Kafka, RecordMetadata } from "kafkajs";
 const kafka = new Kafka({
     clientId: process.env.KAFKA_CLIENT_ID!,
     brokers: [process.env.KAFKA_BROKER!]
@@ -8,10 +8,11 @@ export class KafkaService {
         try {
             const producer = kafka.producer()
             await producer.connect()
-            await producer.send({
+            const response: RecordMetadata[] = await producer.send({
                 topic: topic,
                 messages: [{ value: message }]
             })
+            console.log('Message sent to kafka', response)
             await producer.disconnect();
             return true;
         } catch (error) {
