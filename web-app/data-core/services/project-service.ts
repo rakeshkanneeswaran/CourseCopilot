@@ -3,12 +3,22 @@ import { S3Service } from "./aws/s3-service";
 import logger from "../utils/logger";
 import axios from "axios";
 
+
 interface VideoTranscriptMap {
     videoUrl: string,
     transcriptUrl: string
 
 
 }
+
+type ProjectWithImage = {
+    userId: string;
+    title: string;
+    createdAt: Date;
+    id: string;
+    status: string;
+    imageUrl?: string; // Add the missing property
+};
 
 interface McqQuestions {
     questions: {
@@ -46,8 +56,14 @@ export class ProjectService {
                 where: { userId },
                 select: { userId: true, title: true, createdAt: true, id: true, status: true }
             });
+
+            const projectsWithImages: ProjectWithImage[] = projects.map(project => ({ ...project, imageUrl: "" }));
+
+            for (const project of projectsWithImages) {
+                project.imageUrl = await S3Service.getProjectThumbnailUrl({ userId, projectId: project.id });
+            }
             logger.info(`Fetched ${projects.length} projects for user: ${userId}`);
-            return projects;
+            return projectsWithImages;
         } catch (error) {
             logger.error(`Error fetching projects for userId: ${userId}`, error);
             throw error;
@@ -157,9 +173,15 @@ export class ProjectService {
                 }
             })
 
+
+
+
+
             if (!projectDetails || !projectDetails.projectMetaData) {
                 throw new Error(`Project not found for userId: ${userId}, projectId: ${projectId}`);
             }
+
+
             return {
                 userId: projectDetails.userId,
                 title: projectDetails.title,
@@ -271,6 +293,17 @@ export class ProjectService {
         } catch (error) {
             logger.error(`Error uploading project thumbnail for project: ${projectId} for user: ${userId}`, error);
             throw new Error('Failed to upload project thumbnail');
+        }
+    }
+
+    static async getProjectThumbnail({ userId, projectId }: { userId: string, projectId: string }): Promise<string> {
+        try {
+            logger.info(`Fetching thumbnail for project: ${projectId} for user: ${userId}`);
+            const result = await S3Service.getProjectThumbnailUrl({ userId, projectId });
+            return result;
+        } catch (error) {
+            logger.error(`Error fetching project thumbnail for project: ${projectId} for user: ${userId}`, error);
+            throw new Error('Failed to fetch project thumbnail');
         }
     }
 

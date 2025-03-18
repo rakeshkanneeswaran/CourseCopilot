@@ -230,4 +230,20 @@ export class S3Service {
             throw new Error('Failed to upload project thumbnail to S3');
         }
     }
+
+    static async getProjectThumbnailUrl({ projectId, userId }: { projectId: string, userId: string }) {
+        try {
+            const bucket = process.env.VIDEO_BUCKET_NAME!;
+            const key = `${userId}/${projectId}/thumbnails/thumbnail.png`;
+            const command = new GetObjectCommand({
+                Bucket: bucket,
+                Key: key,
+            });
+            const url = await getSignedUrl(s3, command, { expiresIn: 900 });
+            return url;
+        } catch (error) {
+            logger.error(`Failed to get project thumbnail URL: ${error}`, { userId, projectId });
+            throw new Error('Failed to get project thumbnail URL');
+        }
+    }
 }
