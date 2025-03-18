@@ -2,18 +2,12 @@ from uuid import uuid4
 import boto3
 from botocore.exceptions import ClientError
 from dotenv import load_dotenv
-import requests
-
-# import magic
+import asyncio
+from kafka import KafkaConsumer
 import uvicorn
 from fastapi import (
-    FastAPI,
     HTTPException,
-    Response,
-    UploadFile,
     status,
-    Body,
-    BackgroundTasks,
 )
 from pydantic import BaseModel
 from typing import List, Optional
@@ -23,22 +17,27 @@ import subprocess
 import shutil
 from pathlib import Path
 from botocore.exceptions import NoCredentialsError, PartialCredentialsError, ClientError
-
-# from dotenv import load_dotenv
-# Import your existing utility functions
 from services.transcribe import generate_transcript
 from services.translate import translate_transcript
 from services.combine_audio_video import combine_video_audio
 from services.generate_srt import generate_srt  # Assuming this function exists
+from services.kafka_service import KafkaService
 import json
 
+
 load_dotenv()
+
+from utils.index import upload_to_s3, download_from_s3
+
+
+KAFKA_BROKER = os.getenv("KAFKA_BROKER")
 # AWS Credentials
 session = boto3.Session(
     aws_access_key_id=os.getenv("aws_access_key_id"),
     aws_secret_access_key=os.getenv("aws_secret_access_key"),
     region_name=os.getenv("region_name"),
 )
+s3_client = session.client("s3")
 
 # Constants
 KB = 1024
@@ -49,83 +48,10 @@ OUTPUT_DIRECTORY = os.getenv("OUTPUT_DIRECTORY")
 TEMP_DIRECTORY = os.getenv("TEMP_DIRECTORY")
 PORT = os.getenv("PORT")
 
-s3_client = session.client("s3")
 
 # Create temp directories if they don't exist
 os.makedirs(TEMP_DIRECTORY, exist_ok=True)
 os.makedirs(OUTPUT_DIRECTORY, exist_ok=True)
-
-
-def upload_to_s3(bucket_name: str, local_path: str, s3_key: str) -> bool:
-    """
-    Upload a file from a local path to an S3 bucket.
-
-    Args:
-        bucket_name (str): Name of the S3 bucket.
-        local_path (str): Local path of the file to upload.
-        s3_key (str): S3 key (path) where the file will be stored.
-
-    Returns:
-        bool: True if the upload was successful, False otherwise.
-    """
-    # s3_client = boto3.client("s3")
-    try:
-        logger.info(f"Uploading {local_path} to S3 bucket {bucket_name} at {s3_key}")
-        s3_client.upload_file(local_path, bucket_name, s3_key)
-        logger.info("Upload successful")
-        return True
-    except FileNotFoundError:
-        logger.error(f"The local file {local_path} does not exist.")
-        return False
-    except NoCredentialsError:
-        logger.error("No AWS credentials found.")
-        return False
-    except PartialCredentialsError:
-        logger.error("Incomplete AWS credentials provided.")
-        return False
-    except ClientError as e:
-        logger.error(f"S3 Client Error: {str(e)}")
-        return False
-    except Exception as e:
-        logger.error(f"Unexpected error: {str(e)}")
-        return False
-
-
-def download_from_s3(bucket_name: str, s3_key: str, local_path: str) -> bool:
-    """
-    Download a file from an S3 bucket to a local path.
-
-    Args:
-        bucket_name (str): Name of the S3 bucket.
-        s3_key (str): S3 key (path) of the file to download.
-        local_path (str): Local path where the file will be saved.
-
-    Returns:
-        bool: True if the download was successful, False otherwise.
-    """
-    # s3_client = boto3.client("s3")
-    try:
-        logger.info(
-            f"Downloading {s3_key} from S3 bucket {bucket_name} to {local_path}"
-        )
-        s3_client.download_file(bucket_name, s3_key, local_path)
-        logger.info("Download successful")
-        return True
-    except FileNotFoundError:
-        logger.error(f"The local path {local_path} does not exist.")
-        return False
-    except NoCredentialsError:
-        logger.error("No AWS credentials found.")
-        return False
-    except PartialCredentialsError:
-        logger.error("Incomplete AWS credentials provided.")
-        return False
-    except ClientError as e:
-        logger.error(f"S3 Client Error: {str(e)}")
-        return False
-    except Exception as e:
-        logger.error(f"Unexpected error: {str(e)}")
-        return False
 
 
 # Define Pydantic models for input validation
@@ -145,87 +71,65 @@ class ProcessVideoRequest(BaseModel):
     message: str
 
 
-app = FastAPI()
-
-
-@app.get("/health")
-async def home():
-    return {"message": "Hello from file-upload 😄👋", "status": 200}
-
-
-@app.post("/process-video")
-async def process_video(
-    request: ProcessVideoRequest, background_tasks: BackgroundTasks
-):
-    """
-    Process all videos in the userId/projectId/original_content/video directory.
-    Perform transcription, translation, subtitle generation, and combine audio/video.
-    """
-    logger.info(f"Processing videos for project {request.projectId}")
-    projectId = request.projectId
-    userId = request.userId
-    projectMetaData = request.projectMetaData
-    print(f"this is valud of request {request}")
-
-    print(
-        f"request received  for {request.userId} , {request.projectId}]from {request.serviceName} with message {request.message}"
+async def consume():
+    consumer = KafkaConsumer(
+        "process-video",
+        bootstrap_servers=KAFKA_BROKER,
+        auto_offset_reset="latest",
+        enable_auto_commit=True,
+        group_id="video-processor-group",
+        key_deserializer=lambda k: k.decode() if k else None,
+        value_deserializer=lambda v: json.loads(v.decode()) if v else None,
     )
-
-    # Create project-specific temp directory
-    project_temp_dir = os.path.join(TEMP_DIRECTORY, projectId)
-    os.makedirs(project_temp_dir, exist_ok=True)
-
-    # S3 prefix for the original videos
-    s3_video_prefix = f"{userId}/{projectId}/original_content/videos/"
-
-    try:
-        # 1. List all videos in the S3 directory
-        response = s3_client.list_objects_v2(Bucket=AWS_BUCKET, Prefix=s3_video_prefix)
-        if "Contents" not in response:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="No videos found in the specified S3 directory",
+    print("Kafka Consumer started...")
+    for message in consumer:
+        try:
+            data = message.value
+            print("Data from Kafka", data)
+            projectId = data["projectId"]
+            userId = data["userId"]
+            projectMetaData = data["projectMetaData"]
+            logger.info(f"Processing videos for project {projectId}")
+            project_temp_dir = os.path.join(TEMP_DIRECTORY, projectId)
+            os.makedirs(project_temp_dir, exist_ok=True)
+            s3_video_prefix = f"{userId}/{projectId}/original_content/videos/"
+            response = s3_client.list_objects_v2(
+                Bucket=AWS_BUCKET, Prefix=s3_video_prefix
             )
+            if "Contents" not in response:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="No videos found in the specified S3 directory",
+                )
 
-        # 2. Download all videos
-        for obj in response["Contents"]:
-            video_key = obj["Key"]
-            video_name = os.path.basename(video_key)
-            video_path = os.path.join(project_temp_dir, video_name)
-            logger.info(f"Downloading video: {video_key}")
-            download_from_s3(AWS_BUCKET, video_key, video_path)
-        logger.info("Download successful")
-        background_tasks.add_task(
-            process_video_async, request, project_temp_dir, response["Contents"]
-        )
-        return {
-            "received": True,
-            "projectId": projectId,
-            "userId": userId,
-            "projectMetaData": projectMetaData,
-            "status": 200,
-            "serviceName": "Video Processor",
-            "message": "request received",
-        }
+            # 2. Download all videos
+            for obj in response["Contents"]:
+                video_key = obj["Key"]
+                video_name = os.path.basename(video_key)
+                video_path = os.path.join(project_temp_dir, video_name)
+                logger.info(f"Downloading video: {video_key}")
+                download_from_s3(AWS_BUCKET, video_key, video_path)
+            logger.info("Download successful")
 
-    except Exception as e:
-        logger.error(f"Error processing video: {str(e)}")
-        # Clean up temporary files on error
-        if os.path.exists(project_temp_dir):
-            shutil.rmtree(project_temp_dir)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error processing video: {str(e)}",
-        )
+            request = {
+                "userId": userId,
+                "projectId": projectId,
+                "projectMetaData": projectMetaData,
+            }
+            await process_video_async(request, project_temp_dir, response["Contents"])
+        except Exception as e:
+            print(f"Error processing Kafka message: {e}")
 
 
 async def process_video_async(request, project_temp_dir, video_contents):
     try:
+        print("value of request", request)
         result = {
-            "userId": request.userId,
-            "projectId": request.projectId,
+            "userId": request["userId"],
+            "projectId": request["projectId"],
             "processed_videos": {},
         }
+
         # 3. Process each video
         for video_key in video_contents:
             video_name = os.path.basename(video_key["Key"])
@@ -234,15 +138,15 @@ async def process_video_async(request, project_temp_dir, video_contents):
             print(" Video Path", video_path, "Video Name", video_name)
             print("-------------------------------------------------------------")
             result = {
-                "userId": request.userId,
-                "projectId": request.projectId,
+                "userId": request["userId"],
+                "projectId": request["projectId"],
                 "original_video": video_key["Key"],
                 "processed_videos": {},
             }
 
             # 4. Generate transcript if needed
             transcript_path = None
-            if request.projectMetaData.generate_transcript:
+            if request["projectMetaData"]["generate_transcript"]:
                 logger.info(f"Generating transcript for {video_name}")
                 transcript_path = os.path.join(
                     project_temp_dir, f"transcript_{video_name}.json"
@@ -250,18 +154,21 @@ async def process_video_async(request, project_temp_dir, video_contents):
                 generate_transcript(video_path, transcript_path)
 
                 # Upload transcript to S3
-                transcript_s3_key = f"{request.userId}/{request.projectId}/original_content/transcripts/{video_name}.json"
+                transcript_s3_key = f"{request['userId']}/{request['projectId']}/original_content/transcripts/{video_name}.json"
                 upload_to_s3(AWS_BUCKET, transcript_path, transcript_s3_key)
                 result["transcript"] = transcript_s3_key
 
             # 5. Process for each language
-            for language in request.projectMetaData.languages:
+            for language in request["projectMetaData"]["languages"]:
                 lang_dir = os.path.join(project_temp_dir, language)
                 os.makedirs(lang_dir, exist_ok=True)
 
                 # Skip translation for source language (assuming English is source)
                 translated_transcript_path = transcript_path
-                if language != "English" and request.projectMetaData.generate_translate:
+                if (
+                    language != "English"
+                    and request["projectMetaData"]["generate_translate"]
+                ):
                     logger.info(f"Translating to {language}")
                     translated_transcript_path = os.path.join(
                         lang_dir, f"transcript_{language}_{video_name}.json"
@@ -271,7 +178,7 @@ async def process_video_async(request, project_temp_dir, video_contents):
                     )
 
                     # Upload translated transcript to S3
-                    translated_transcript_s3_key = f"{request.userId}/{request.projectId}/processed/{language}/transcripts/{video_name}.json"
+                    translated_transcript_s3_key = f"{request['userId']}/{request['projectId']}/processed/{language}/transcripts/{video_name}.json"
                     upload_to_s3(
                         AWS_BUCKET,
                         translated_transcript_path,
@@ -280,7 +187,7 @@ async def process_video_async(request, project_temp_dir, video_contents):
                 # 6. Generate SRT file if needed
                 subtitle_path = None
                 if (
-                    request.projectMetaData.generate_subtitle
+                    request["projectMetaData"]["generate_subtitle"]
                     and translated_transcript_path
                 ):
                     logger.info(f"Generating SRT for {language}")
@@ -302,7 +209,7 @@ async def process_video_async(request, project_temp_dir, video_contents):
                     logger.info(f"Generating TTS and combining video for {language}")
                     output_video_path = os.path.join(
                         OUTPUT_DIRECTORY,
-                        f"{request.projectId}_{language}_{video_name}.mp4",
+                        f"{request['projectId']}_{language}_{video_name}.mp4",
                     )
                     with open(
                         translated_transcript_path, "r", encoding="utf-8"
@@ -327,7 +234,7 @@ async def process_video_async(request, project_temp_dir, video_contents):
                     )
 
                     # 8. Upload final video to S3
-                    output_s3_key = f"{request.userId}/{request.projectId}/processed/{language}/videos/{video_name}"
+                    output_s3_key = f"{request['userId']}/{request['projectId']}/processed/{language}/videos/{video_name}"
                     upload_to_s3(AWS_BUCKET, output_video_path, output_s3_key)
 
                     # Add to result
@@ -347,24 +254,15 @@ async def process_video_async(request, project_temp_dir, video_contents):
                 logger.error(f"Failed to delete {file_path}. Reason: {str(e)}")
 
         data = {
-            "projectId": request.projectId,
+            "projectId": request["projectId"],
             "status": 200,
-            "userId": request.userId,
+            "userId": request["userId"],
             "serviceName": "Video Processor",
             "message": "Video Processing Completed",
         }
 
-        print()
-
-        api_url = os.getenv("BACKGROUND_JOB_URL")
-
-        response = requests.post(api_url, json=data)
-        logger.info("Processing completed successfully")
-        return {
-            "projectId": request.projectId,
-            "userId": request.userId,
-            "status": "200",
-        }
+        print("Message to backgournd job", data)
+        await KafkaService.send_message_to_kafka(json.dumps(data))
 
     except Exception as e:
         logger.error(f"Error processing video: {str(e)}")
@@ -376,138 +274,9 @@ async def process_video_async(request, project_temp_dir, video_contents):
             detail=f"Error processing video: {str(e)}",
         )
 
+
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app="main:app", host="0.0.0.0", port=3002,reload=True)
-
-# @app.post("/process-video")
-# async def process_video(request: ProcessVideoRequest, background_tasks: BackgroundTasks):
-#     """
-#     Process all videos in the userId/projectId/original_content/video directory.
-#     Perform transcription, translation, subtitle generation, and combine audio/video.
-#     """
-#     logger.info(f"Processing videos for project {request.projectId}")
-#     projectId = request.projectId
-#     userId = request.userId
-
-#     # Create project-specific temp directory
-#     project_temp_dir = os.path.join(TEMP_DIRECTORY, projectId)
-#     os.makedirs(project_temp_dir, exist_ok=True)
-
-#     # S3 prefix for the original videos
-#     s3_video_prefix = f"{userId}/{projectId}/original_content/videos/"
-
-#     try:
-#         # 1. List all videos in the S3 directory
-#         response = s3_client.list_objects_v2(Bucket=AWS_BUCKET, Prefix=s3_video_prefix)
-#         if "Contents" not in response:
-#             raise HTTPException(
-#                 status_code=status.HTTP_404_NOT_FOUND,
-#                 detail="No videos found in the specified S3 directory"
-#             )
-
-#         # 2. Download all videos
-#         for obj in response["Contents"]:
-#             video_key = obj["Key"]
-#             video_name = os.path.basename(video_key)
-#             video_path = os.path.join(project_temp_dir, video_name)
-#             logger.info(f"Downloading video: {video_key}")
-#             download_from_s3(AWS_BUCKET, video_key, video_path)
-#         logger.info("Download successful")
-#         background_tasks.add_task(process_video_async, request, project_temp_dir, response["Contents"])
-#         return {"message": "Download successful"}
-
-#     except Exception as e:
-#         logger.error(f"Error processing video: {str(e)}")
-#         # Clean up temporary files on error
-#         if os.path.exists(project_temp_dir):
-#             shutil.rmtree(project_temp_dir)
-#         raise HTTPException(
-#             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-#             detail=f"Error processing video: {str(e)}"
-#         )
-
-# async def process_video_async(request, project_temp_dir, video_contents):
-#     result = {"userId": request.userId, "projectId": request.projectId, "processed_videos": {}}
-#     try:
-#         # 3. Process each video
-#         for video_key in video_contents:
-#             video_name = os.path.basename(video_key["Key"])
-#             video_path = os.path.join(project_temp_dir, video_name)
-
-#             # 4. Generate transcript if needed
-#             transcript_path = None
-#             if request.projectMetaData.generate_transcript:
-#                 logger.info(f"Generating transcript for {video_name}")
-#                 transcript_path = os.path.join(project_temp_dir, f"transcript_{video_name}.json")
-#                 generate_transcript(video_path, transcript_path)
-
-#                 # Upload transcript to S3
-#                 transcript_s3_key = f"{request.userId}/{request.projectId}/original_content/transcripts/{video_name}.json"
-#                 upload_to_s3(AWS_BUCKET, transcript_path, transcript_s3_key)
-#                 result["transcript"] = transcript_s3_key
-
-#             # 5. Process for each language
-#             for language in request.projectMetaData.languages:
-#                 lang_dir = os.path.join(project_temp_dir, language)
-#                 os.makedirs(lang_dir, exist_ok=True)
-
-#                 # Skip translation for source language (assuming English is source)
-#                 translated_transcript_path = transcript_path
-#                 if language != "English" and request.projectMetaData.generate_translate:
-#                     logger.info(f"Translating to {language}")
-#                     translated_transcript_path = os.path.join(lang_dir, f"transcript_{language}_{video_name}.json")
-#                     translate_transcript(transcript_path, translated_transcript_path, language)
-
-#                     # Upload translated transcript to S3
-#                     translated_transcript_s3_key = f"{request.userId}/{request.projectId}/processed/{language}/transcripts/{video_name}.json"
-#                     upload_to_s3(AWS_BUCKET, translated_transcript_path, translated_transcript_s3_key)
-
-#                 # 6. Generate SRT file if needed
-#                 subtitle_path = None
-#                 if request.projectMetaData.generate_subtitle and translated_transcript_path:
-#                     logger.info(f"Generating SRT for {language}")
-#                     subtitle_path = os.path.join(lang_dir, f"subtitle_{language}_{video_name}.srt")
-#                     generate_srt(translated_transcript_path, subtitle_path)
-
-#                 # 7. Generate TTS audio and combine with video
-#                 if translated_transcript_path:
-#                     logger.info(f"Generating TTS and combining video for {language}")
-#                     output_video_path = os.path.join(OUTPUT_DIRECTORY, f"{request.projectId}_{language}_{video_name}.mp4")
-#                     with open(translated_transcript_path, "r", encoding="utf-8") as file:
-#                         transcript_data = json.load(file)
-#                     transcription = [
-#                         {
-#                             "start_time": entry["start_time"],
-#                             "end_time": entry["end_time"],
-#                             "text": entry["text"]
-#                         } for entry in transcript_data
-#                     ]
-
-#                     combine_video_audio(video_path, transcription, output_video_path, subtitle_path)
-
-#                     # 8. Upload final video to S3
-#                     output_s3_key = f"{request.userId}/{request.projectId}/processed/{language}/videos/{video_name}"
-#                     upload_to_s3(AWS_BUCKET, output_video_path, output_s3_key)
-
-#                     # Add to result
-#                     result["processed_videos"][language] = output_s3_key
-
-#         # 9. Clean up temporary files
-#         shutil.rmtree(project_temp_dir)
-
-#         logger.info("Processing completed successfully")
-#         return {"message": "Download and processing successful", "results": result}
-
-#     except Exception as e:
-#         logger.error(f"Error processing video: {str(e)}")
-#         # Clean up temporary files on error
-#         if os.path.exists(project_temp_dir):
-#             shutil.rmtree(project_temp_dir)
-#         raise HTTPException(
-#             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-#             detail=f"Error processing video: {str(e)}"
-#         )
-
-# if __name__ == "__main__":
-#     uvicorn.run(app="main:app", reload=True)
+    try:
+        asyncio.run(consume())
+    except KeyboardInterrupt:
+        print("Shutting down...")

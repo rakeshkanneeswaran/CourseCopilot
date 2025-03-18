@@ -10,6 +10,8 @@ export async function GET() {
 export async function POST(req: Request) {
     try {
         const data: UpdateProjectStatus = await req.json();
+        console.log('Received request:', data);
+
         console.log(`Received request for userId : ${data.projectMetaData.userId} projectId : ${data.projectMetaData.projectId} from ${data.serviceName} with message ${data.message}`);
         await ProjectService.updateProjectStatus(data.projectMetaData.projectId, data.projectMetaData.projectStatus);
         return NextResponse.json({ message: 'Project status updated', received: data }, { status: 200 });

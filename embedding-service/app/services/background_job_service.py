@@ -1,9 +1,11 @@
 from services.embedding_service import EmbeddingService
 from services.s3_service import S3Service
 from services.file_service import FileService
+from services.kafka_service import KafkaService
 import requests
 import os
 import shutil
+import json
 
 
 class BackgroundJobService:
@@ -23,24 +25,18 @@ class BackgroundJobService:
                 f"vectorstore/{userId}/{projectId}/", s3_prefix
             )
             print(f"Deleting local file {local_file_path}")
-            # FileService.delete_transcript_directory(userId, projectId)
             shutil.rmtree(f"transcripts/{userId}")
             print(f"Updating status for {userId} and {projectId}")
-            request_to_update_status = requests.post(
-                os.getenv("UPDATE_EMBEDDING_SERVICE_URL"),
-                json={
-                    "processStatus": "COMPLETED",
-                    "userId": userId,
-                    "projectId": projectId,
-                    "serviceName": "Embedding Service",
-                    "message": "embedding process done",
-                },
-            )
-            if request_to_update_status.status_code != 200:
-                raise Exception("Failed to update status")
+            playload = {
+                "processStatus": "COMPLETED",
+                "userId": userId,
+                "projectId": projectId,
+                "serviceName": "Embedding Service",
+                "message": "embedding process done",
+            }
+            print(f"Sending message to Kafka {playload}")
+            json_string = json.dumps(playload)
+            await KafkaService.send_message_to_kafka(json_string)
+
         except Exception as e:
-            request_to_update_status = requests.post(
-                os.getenv("UPDATE_EMBEDDING_SERVICE_URL"),
-                json={"status": "FAILED", "projectId": projectId},
-            )
             raise e

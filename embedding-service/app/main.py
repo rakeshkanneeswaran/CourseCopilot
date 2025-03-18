@@ -1,51 +1,58 @@
-from services.embedding_service import EmbeddingService
-from services.s3_service import S3Service
-from services.file_service import FileService
 from services.background_job_service import BackgroundJobService
 from dotenv import load_dotenv
-from fastapi import FastAPI, Request, BackgroundTasks
-import uvicorn
 import requests
 import os
-
+import json
+import asyncio
+from kafka import KafkaConsumer
 
 load_dotenv()
 
+KAFKA_BROKER = os.getenv("KAFKA_BROKER")
+KAFKA_TOPIC = os.getenv("KAFKA_TOPIC_CONSUMER")
+GROUP_ID = "embedding-service-group"
 
-app = FastAPI()
+
+async def consume():
+    consumer = KafkaConsumer(
+        KAFKA_TOPIC,
+        bootstrap_servers=KAFKA_BROKER,
+        auto_offset_reset="latest",
+        enable_auto_commit=True,
+        group_id=GROUP_ID,
+        key_deserializer=lambda k: k.decode() if k else None,
+        value_deserializer=lambda v: json.loads(v.decode()) if v else None,
+    )
+
+    print("Kafka Consumer started...")
+
+    for message in consumer:
+        try:
+            data = message.value
+            userId = data["projectMetaData"].get("userId")
+            projectId = data["projectMetaData"].get("projectId")
+
+            if not userId or not projectId:
+                print("Missing userId or projectId")
+                continue
+
+            print(
+                f"Received request from {data['serviceName']} for userId: {userId} and projectId: {projectId} with message {data['message']} at {data['timestamp']}"
+            )
+            # Run the background job asynchronously
+            await BackgroundJobService.run_background_job(userId, projectId)
+
+        except Exception as e:
+            print(f"Error processing Kafka message: {e}")
 
 
-@app.post("/create/vectorstore/")
-async def main(request: Request, background_tasks: BackgroundTasks):
-    try:
-        data = await request.json()
-        userId = data["projectMetaData"]["userId"]
-        projectId = data["projectMetaData"]["projectId"]
-        print(
-            f"Received request from  {data['serviceName']} for userId: {userId} and projectId: {projectId} with message {data['message']} at {data['timestamp']}"
-        )
-        if not (userId and projectId):
-            return {"status": 400, "message": "userId and projectId are required"}
-        background_tasks.add_task(
-            BackgroundJobService.run_background_job, userId, projectId
-        )
-        return {"status": 200, "message": "Job started"}
-    except Exception as e:
-        request_to_update_status = requests.post(
-            os.getenv("UPDATE_EMBEDDING_SERVICE_URL"),
-            json={
-                "processStatus": "FAILED",
-                "userId": userId,
-                "projectId": projectId,
-                "serviceName": "Embedding Service",
-                "message": "embedding failed",
-                "error": str(e),
-            },
-        )
-        if request_to_update_status.status_code != 200:
-            raise Exception("Failed to update status")
-        return {"error": str(e)}
+async def main():
+    # Start Kafka consumer
+    await consume()
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=3003, reload=True)
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("Shutting down...")

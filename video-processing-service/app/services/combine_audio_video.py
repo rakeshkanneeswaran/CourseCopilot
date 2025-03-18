@@ -14,7 +14,7 @@ os.environ["GRPC_FORK_SUPPORT_ENABLED"] = "0"
 
 # Create a semaphore to limit concurrent API calls
 # This helps prevent overwhelming the gRPC service
-api_semaphore = threading.Semaphore(5)  # Limit to 2 concurrent requests
+api_semaphore = threading.Semaphore(10)  # Limit to 2 concurrent requests
 
 
 def retry_on_error(max_attempts=4, delay_seconds=2):
@@ -142,7 +142,7 @@ def process_batch(
     temp_files = []
     futures = []
 
-    with ThreadPoolExecutor(max_workers=8) as executor:
+    with ThreadPoolExecutor(max_workers=16) as executor:
         for i, segment in enumerate(batch):
             global_index = start_index + i
             print(f"Processing segment {global_index + 1}/{total_segments}")
@@ -181,7 +181,7 @@ def generate_tts(video_path, language_code, language_name, ssml_gender, transcri
         all_temp_files = []
 
         # Process in smaller batches to avoid overwhelming the gRPC service
-        batch_size = 5
+        batch_size = 10
         for batch_start in range(0, len(transcription), batch_size):
             batch_end = min(batch_start + batch_size, len(transcription))
             batch = transcription[batch_start:batch_end]
@@ -340,7 +340,7 @@ def combine_video_audio(
         #         output_path,  # Output file
         #     ]
         if subtitle_path and os.path.exists(subtitle_path):
-    # FFmpeg command with subtitles and audio speed adjustment
+            # FFmpeg command with subtitles and audio speed adjustment
             ffmpeg_command = [
                 "ffmpeg",
                 "-i",
