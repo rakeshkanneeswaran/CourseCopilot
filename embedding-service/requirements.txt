@@ -8,3 +8,5 @@ python-dotenv
 fastapi
 uvicorn
 sentence-transformers
+kafka-python 
+asyncio
