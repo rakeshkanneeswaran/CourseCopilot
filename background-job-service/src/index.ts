@@ -13,7 +13,6 @@ const requiredEnvVars = [
     "KAFKA_BROKER",
     "KAFKA_GROUP_ID_PROCESS_PROJECT",
     "KAFKA_GROUP_ID_PROCESS_EMBEDDING",
-    "VIDEO_PROCESSOR_URL",
     "WEB_APP_URL",
 ];
 
