@@ -1,51 +1,35 @@
-# AI-Powered Learning Platform
+## **Course-Copilot**
 
-## Overview
-This project is an AI-powered platform that offers:
-- **Automatic Video Translation & Transcription**
-- **Smart Test Generation**
-- **Interactive AI Assistant** for every course
+👋 Hi everyone, welcome. I've tried to keep this README as straightforward as possible, focusing on just the necessary information. **I've assumed that those looking at this repository have at least a couple of years of software development experience**. Hopefully, it's helpful
+## **Project Overview**  
 
-It leverages advanced AI models for seamless learning experiences, enabling users to upload course videos and interact with AI-generated content.
+Couse-Copilot enables users to **convert an entire playlist into multiple languages** while **generating transcripts** for each language. After processing the playlist, a **vector database** is created for each playlist, allowing users to interact with an **AI-powered chatbot**.  
 
-## Features
-- **AI-Powered Transcription & Translation**: Uses Whisper & FFmpeg for high-quality processing.
-- **Smart Test Generation**: Generates quizzes based on video content.
-- **AI Assistant**: Uses Hugging Face & LangChain to answer course-related queries.
-- **Real-time Updates**: WebSocket-based communication ensures a smooth user experience.
-
-## System Design
+The chatbot utilizes **Retrieval-Augmented Generation (RAG)** to answer questions based on the processed video content, ensuring accurate and context-aware responses.  
 
 
-## Tech Stack
-- **Frontend**: Next.js
-- **Backend**: Node.js,
-- **Message Queue**: Kafka
-- **Storage**: AWS S3
-- **AI Processing**:
-  - Whisper (Transcription & Translation)
-  - FFmpeg (Video Processing)
-  - Hugging Face (Embedding & AI Assistant)
-  - LangChain (Query Processing)
+
+## **System Design & Workflow**
+![System Design](PLACEHOLDER_FOR_SYSTEM_DESIGN_DIAGRAM)
+
+
+## **Tech Stack**  
+This project comprises an integration of multiple technologies. The mainly web app and background-job-service  jobs are written in **TypeScript**, while other services such as the **intelligent-service  (RAG chatbot), embeddings-service, and video-processing-service** are implemented in **Python**. For infrastructure, **Terraform** is used to create an **S3 bucket** for data storage.
+
+To facilitate communication between microservices, **Apache Kafka** is used to enable distributed computing. For storing the details of projects, **PostgreSQ**L is used, accessed via **Prisma**.
+
 
 ## Folder Structure
 ```
-├── infrastructure/        # Terraform scripts for AWS S3 bucket setup
-├── intelligence-service/  # LangChain & AI-powered assistant service
-├── embedding-service/     # Embedding vector service using Hugging Face
-├── web-app/               # Frontend application (Next.js)
-├── background-job/        # Handles Kafka-triggered background tasks
-├── video-processor/       # Video processing service using FFmpeg & Whisper
-├── docker-compose.yml     # Docker Compose file to orchestrate all services
+├── web-app/ # Frontend application (Next.js)
+├── background-job/-service # Manages Kafka-triggered tasks and distributes them to other services
+├── video-processing-service # Handles video translation and transcription using Whisper & FFmpeg 
+├── embedding-service/ # Processes course content, generates vector embeddings, and stores them in S3 
+├── intelligence-service/ # LangChain-powered AI assistant that queries the vector database 
+├── infrastructure/ # Terraform scripts for provisioning AWS S3 and other infrastructure 
+├── docker-compose.yml # Docker Compose configuration to orchestrate all services
 ```
 Each service contains a **Dockerfile** to enable containerization, and the `docker-compose.yml` in the main directory helps start all services together.
-
-## Workflow
-1. **User uploads a video**, which is stored in AWS S3.
-2. **Kafka triggers background jobs** to process the video.
-3. **Transcription & translation are performed** using Whisper & FFmpeg.
-4. **Embedding service generates vector data** and stores it.
-5. **AI Assistant loads vector data** and provides intelligent responses.
 
 ## Setup & Installation
 ### Prerequisites
@@ -55,25 +39,19 @@ Each service contains a **Dockerfile** to enable containerization, and the `dock
 - Kafka setup
 
 ### Installation
-1. Clone the repository:
+1. **Clone the repository:**  
    ```sh
    git clone https://github.com/rakeshkanneeswaran/EduVerseAI.git
-   cd your-repo
-   ```
-2. Install dependencies:
-   ```sh
-   pnpm install
-   ```
-3. Configure environment variables:
-   - Create a `.env` file based on `.env.example`
-4. Start all services using Docker Compose:
+   cd EduVerseAI
+   ```  
+2. **Install dependencies:**  
+   Each microservice contains its own `setup.md` file with installation instructions.  
+
+3. **Configure environment variables:**  
+   - Create `.env` and `docker.env` files based on `.env.example` and `docker.env.example`.  
+
+4. **Start all services using Docker Compose:**  
    ```sh
    docker-compose up --build
    ```
-
-## Contribution
-Feel free to contribute by submitting issues or pull requests. 🚀
-
-## License
-This project is licensed under the MIT License.
 
