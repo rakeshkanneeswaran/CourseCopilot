@@ -1,16 +1,17 @@
-## **Course-Copilot**
+## **Course-Copilot (Version 2)**
 
 👋 Hi everyone, welcome. I've tried to keep this README as straightforward as possible, focusing on just the necessary information. **I've assumed that those looking at this repository have at least a couple of years of software development experience**. Hopefully, it's helpful
 ## **Project Overview**  
 
-Couse-Copilot enables users to **convert an entire playlist into multiple languages** while **generating transcripts** for each language. After processing the playlist, a **vector database** is created for each playlist, allowing users to interact with an **AI-powered chatbot**.  
+Course-Copilot enables users to **convert an entire playlist into multiple languages** while **generating transcripts** for each language. After processing the playlist, a **vector database** is created for each playlist, allowing users to interact with an **AI-powered chatbot**.  
 
 The chatbot utilizes **Retrieval-Augmented Generation (RAG)** to answer questions based on the processed video content, ensuring accurate and context-aware responses.  
 
 
 
 ## **System Design & Workflow**
-![System Design](PLACEHOLDER_FOR_SYSTEM_DESIGN_DIAGRAM)
+<img width="1385" alt="Screenshot 2025-03-19 at 8 44 52 AM" src="https://github.com/user-attachments/assets/450b26ab-7513-464b-acd7-aad7c95cf2c0" />
+CEHOLDER_FOR_SYSTEM_DESIGN_DIAGRAM)
 
 
 ## **Tech Stack**  
