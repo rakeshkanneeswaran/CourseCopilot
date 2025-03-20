@@ -54,6 +54,8 @@ export default function App({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [inviteeEmail, setInviteeEmail] = useState("");
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
+  const [isResultModalOpen, setIsResultModalOpen] = useState(false);
+  const [resultMessage, setResultMessage] = useState("");
 
   const handleInviteClick = (projectId: string) => {
     setCurrentProjectId(projectId);
@@ -69,14 +71,17 @@ export default function App({
       projectId: currentProjectId,
       emailId: inviteeEmail,
     });
+
     if (result) {
-      alert("Invitation sent successfully");
-    }
-    if (!result) {
-      alert("either use does not exist or already invited");
+      setResultMessage("Invitation sent successfully");
+    } else {
+      setResultMessage("Either user does not exist or already invited");
     }
 
-    // Close the modal after submission
+    // Show the result modal
+    setIsResultModalOpen(true);
+
+    // Close the invitation modal after submission
     setIsModalOpen(false);
     setInviteeEmail("");
     setCurrentProjectId(null);
@@ -243,6 +248,27 @@ export default function App({
                 Invite
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal for Result */}
+      {isResultModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-[#eceae0] p-6 h-[200px] w-[400px] rounded-lg shadow-lg flex flex-col justify-between">
+            {/* Modal Header */}
+            <h2 className="text-xl font-semibold mb-4">Invitation Result</h2>
+
+            {/* Result Message */}
+            <p className="text-gray-700">{resultMessage}</p>
+
+            {/* Close Button */}
+            <button
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200"
+              onClick={() => setIsResultModalOpen(false)}
+            >
+              Close
+            </button>
           </div>
         </div>
       )}

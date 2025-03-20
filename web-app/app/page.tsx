@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 export default function Home() {
   const router = useRouter();
   return (
-    <div className="bg-gradient-to-r from-[#f5f5f5] via-[#e8e8e8] to-[#dcdcdc] min-h-screen flex flex-col items-center justify-center px-4 py-16">
+    <div className="bg-gradient-to-r from-[#e9e6dc] via-[#edd7cb] to-[#edd7cb] min-h-screen flex flex-col items-center justify-center px-4 py-16">
       <div className="w-full max-w-5xl text-center px-8">
         <h1 className="text-4xl md:text-5xl font-extrabold text-[#333] mb-6 leading-tight tracking-tight">
           Unlock the Pinnacle of Educational Excellence with AI Precision
@@ -27,6 +27,7 @@ export default function Home() {
           src="https://eduverseai-production.s3.ap-south-1.amazonaws.com/demo-video.mov"
           autoPlay
           muted
+          loop
           playsInline
         ></video>
       </div>
