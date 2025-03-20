@@ -24,6 +24,12 @@ interface McqQuestions {
   }[];
 }
 
+interface userAiMessages {
+  index: number;
+  userMessage: string;
+  aiMessage: string;
+}
+
 interface VideoTranscriptMap {
   videoUrl: string;
   transcriptUrl: string;
@@ -56,11 +62,14 @@ export default function Page() {
   const [showOptions, setShowOptions] = useState(false);
   const [messageFromIntellignece, setMessageFromIntellignece] =
     useState<string[]>();
+
+  const [userAiMessages, setUserAiMessages] = useState<userAiMessages[]>([]);
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const [mcqQuestions, setMcqQuestions] = useState<McqQuestions>();
   const [isMcqPopupOpen, setIsMcqPopupOpen] = useState(false);
+  let index = 0;
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -72,6 +81,15 @@ export default function Page() {
     e.preventDefault();
     if (ws) {
       ws.send(JSON.stringify({ request_type: "query", query: inputValue }));
+      const newMessage = {
+        index: index,
+        userMessage: inputValue,
+        aiMessage: "",
+      };
+      setUserAiMessages((prev) => {
+        return [...prev, newMessage];
+      });
+      index++;
     }
     setInputValue("");
   };
@@ -90,6 +108,10 @@ export default function Page() {
     };
     socket.onmessage = (message) => {
       const data = JSON.parse(message.data);
+      setUserAiMessages((prev) => {
+        prev[prev.length - 1].aiMessage = data.text;
+        return [...prev];
+      });
       setMessageFromIntellignece((prev) => {
         return [...(prev || []), data.text];
       });
@@ -235,10 +257,26 @@ export default function Page() {
 
           {/* Messages appear from the top with spacing */}
           <div className="w-full h-72 p-2 text-black rounded-lg overflow-y-auto flex flex-col space-y-2">
-            {messageFromIntellignece?.map((message, index) => (
-              <p key={index} className="p-2 bg-[#e7e5db] rounded-md shadow-sm">
-                {message}
-              </p>
+            {userAiMessages.map((message, index) => (
+              <div
+                key={index}
+                className={`${
+                  message.aiMessage ? "flex justify-end" : "flex justify-start"
+                } flex-col gap-2`}
+              >
+                <p
+                  className={`p-2 bg-[#e7e5db] rounded-md shadow-sm ${
+                    message.aiMessage ? "bg-[#c05e3c] text-black" : ""
+                  }`}
+                >
+                  {message.userMessage}
+                </p>
+                {message.aiMessage && (
+                  <p className="p-2 bg-[#c05e3c] text-white rounded-md shadow-sm">
+                    {message.aiMessage}
+                  </p>
+                )}
+              </div>
             ))}
             <div ref={messagesEndRef}></div>
           </div>
