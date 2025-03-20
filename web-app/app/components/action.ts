@@ -10,3 +10,11 @@ export async function deleteProject({ userId, projectId }: { userId: string; pro
     }
 
 }
+
+export async function addParticipantToProject({ projectId, emailId }: { projectId: string; emailId: string }): Promise<boolean> {
+    try {
+        return await ProjectService.addParticipantToProject({ projectId, emailId })
+    } catch (error) {
+        throw error
+    }
+}

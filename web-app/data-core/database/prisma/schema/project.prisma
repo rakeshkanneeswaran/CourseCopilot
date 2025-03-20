@@ -9,6 +9,7 @@ model Project {
     projectMetaDataId String?
     projectMetaData   ProjectMetaData?
     createdAt         DateTime         @default(now())
+    participants      Participants[]
 }
 
 model ProjectMetaData {

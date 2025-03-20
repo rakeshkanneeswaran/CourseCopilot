@@ -1,0 +1,18 @@
+model Participants {
+    id                      String                   @id @default(uuid())
+    name                    String
+    created_at              DateTime                 @default(now())
+    updated_at              DateTime                 @updatedAt
+    ParticipantsCredentials ParticipantsCredentials?
+    Projects                Project[]
+}
+
+model ParticipantsCredentials {
+    id            String       @id @default(uuid())
+    participant   Participants @relation(fields: [participantId], references: [id])
+    participantId String       @unique
+    emailId       String       @unique
+    password      String
+    created_at    DateTime     @default(now())
+    updated_at    DateTime     @updatedAt
+}
