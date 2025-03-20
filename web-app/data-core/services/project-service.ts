@@ -70,6 +70,38 @@ export class ProjectService {
         }
     }
 
+    static async getProjectByParticipantId({ participantId }: { participantId: string }) {
+        try {
+            logger.info(`Fetching project for participant: ${participantId}`);
+            const projects = await prismaClient.project.findMany({
+                where: {
+                    participants: {
+                        some: {
+                            id: participantId
+                        }
+                    }
+
+                },
+                include: {
+                    user: {
+                        select: {
+                            id: true
+                        }
+                    }
+                }
+            })
+            const projectsWithImages: ProjectWithImage[] = projects.map(project => ({ ...project, imageUrl: "" }));
+            for (const project of projectsWithImages) {
+                project.imageUrl = await S3Service.getProjectThumbnailUrl({ userId: project.userId, projectId: project.id });
+            }
+            return projectsWithImages;
+
+        } catch (error) {
+            logger.error(`Error fetching projects for participantId: ${participantId}`, error);
+            throw error;
+        }
+    }
+
     static async updateProjectStatus(projectId: string, status: string) {
         try {
             logger.info(`Updating status for project: ${projectId} to ${status}`);
@@ -307,7 +339,43 @@ export class ProjectService {
         }
     }
 
+    static async addParticipantToProject({ projectId, emailId }: { projectId: string, emailId: string }): Promise<boolean> {
+        try {
+
+            const participant = await prismaClient.participants.findFirst({
+                where: {
+                    ParticipantsCredentials: {
+                        emailId: emailId // This works with findFirst(), not findUnique()
+                    }
+                }
+            });
+
+            if (!participant) {
+                return false
+            }
+
+            await prismaClient.project.update({
+                where: { id: projectId },
+                data: {
+                    participants: {
+                        connect: {
+                            id: participant.id
+                        }
+                    }
+                }
+            })
+
+            return true
+
+        } catch (error) {
+            console.error('Error adding participant to project:', error);
+            throw new Error('Failed to add participant to project');
+        }
+
+    }
 }
+
+
 
 
 

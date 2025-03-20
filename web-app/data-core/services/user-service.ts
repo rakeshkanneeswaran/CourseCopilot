@@ -81,4 +81,30 @@ export class UserService {
             throw new Error("Failed to find user by credentials");
         }
     }
+
+    static async findParticipantByCredentials({ username, password }: { username: string, password: string }) {
+        try {
+            logger.debug(`Finding user by credentials: ${username}`);
+            console.log(`Finding user by credentials: ${username}`);
+            console.log(process.env.DATABASE_URL);
+
+            const userExist = await prismaClient.participantsCredentials.findUnique({
+                where: { emailId: username, password },
+                select: { participantId: true }
+            });
+
+            logger.info(`User found: ${userExist?.participantId}`);
+
+            if (!userExist?.participantId) {
+                logger.warn(`User not found for credentials: ${username}`);
+                throw new Error("User not found");
+            }
+
+            logger.info(`User found: ${userExist.participantId}`);
+            return userExist.participantId;
+        } catch (error) {
+            logger.error(`Error finding user by credentials ${username}:`, error);
+            throw new Error("Failed to find user by credentials");
+        }
+    }
 }
