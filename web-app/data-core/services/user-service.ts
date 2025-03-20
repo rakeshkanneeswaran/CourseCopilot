@@ -55,6 +55,42 @@ export class UserService {
         }
     }
 
+    static async createParticipant({ emailId, password, name }: { emailId: string, password: string, name: string }) {
+        try {
+            logger.info(`Participant signup attempt: ${emailId}`);
+
+            const result = await prismaClient.$transaction(async (tx) => {
+                const userExist = await tx.participantsCredentials.findFirst({ where: { emailId } });
+
+                if (userExist) {
+                    logger.warn(`Signup failed: Email already exists - ${emailId}`);
+                    return { status: false, userId: "" };
+                }
+
+                const user = await tx.participants.create({
+                    data: { name }
+                });
+
+                const credentials = await tx.participantsCredentials.create({
+                    data: {
+                        emailId: emailId,
+                        password: password,
+                        participantId: user.id
+                    }
+                });
+
+
+                logger.info(`Participant created successfully: ${credentials.participantId}`);
+                return { status: true, userId: credentials.participantId };
+            });
+
+            return result;
+        } catch (error) {
+            logger.error(`Error signing up participant ${emailId}:`, error);
+            throw new Error("Failed to signup participant");
+        }
+    }
+
     static async findUserByCredentials({ username, password }: { username: string, password: string }) {
         try {
             logger.debug(`Finding user by credentials: ${username}`);
