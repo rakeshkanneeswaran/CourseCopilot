@@ -39,7 +39,7 @@ export default function Home() {
             router.push("/login");
           }}
         >
-          Login as Teacher
+          Login as Creator
         </button>
         <button
           className="bg-black text-white text-lg font-bold tracking-wide py-3 px-8 rounded-full shadow-md transition-colors duration-300"
