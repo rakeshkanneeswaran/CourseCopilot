@@ -16,7 +16,7 @@ RUN pnpm install
 RUN pnpm build
 
 # Expose the necessary port (if needed)
-EXPOSE 3001
+EXPOSE 3002
 
 # Command to run the app
 CMD ["pnpm", "run", "start"]

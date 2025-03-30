@@ -4,4 +4,4 @@ myenv/
 
 vectorstore
 .env
-docker.env
+docker.env.env
