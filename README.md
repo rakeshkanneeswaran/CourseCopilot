@@ -8,6 +8,13 @@ Course-Copilot enables users to **convert an entire playlist into multiple langu
 The chatbot utilizes **Retrieval-Augmented Generation (RAG)** to answer questions based on the processed video content, ensuring accurate and context-aware responses.  
 
 
+## 📽️ **Explanation and Walkthrough**
+
+[![Watch the video](https://img.youtube.com/vi/sU24kCXdFng/maxresdefault.jpg)](https://www.youtube.com/watch?v=sU24kCXdFng)
+
+▶️ [Click here to watch the video walkthrough](https://www.youtube.com/watch?v=sU24kCXdFng)
+
+
 
 ## **System Design & Workflow**
 <img width="1385" alt="Screenshot 2025-03-19 at 8 44 52 AM" src="https://github.com/user-attachments/assets/450b26ab-7513-464b-acd7-aad7c95cf2c0" />
