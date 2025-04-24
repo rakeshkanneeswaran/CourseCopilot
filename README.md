@@ -1,18 +1,10 @@
 ## **Course-Copilot (Version 2)**
 
-👋 Hi everyone, welcome. I've tried to keep this README as straightforward as possible, focusing on just the necessary information. **I've assumed that those looking at this repository have at least a couple of years of software development experience**. Hopefully, it's helpful
-## **Project Overview**  
+
 
 Course-Copilot enables users to **convert an entire playlist into multiple languages** while **generating transcripts** for each language. After processing the playlist, a **vector database** is created for each playlist, allowing users to interact with an **AI-powered chatbot**.  
 
 The chatbot utilizes **Retrieval-Augmented Generation (RAG)** to answer questions based on the processed video content, ensuring accurate and context-aware responses.  
-
-
-## 📽️ **Explanation and Walkthrough**
-
-[![Watch the video](https://img.youtube.com/vi/sU24kCXdFng/maxresdefault.jpg)](https://www.youtube.com/watch?v=sU24kCXdFng)
-
-▶️ [Click here to watch the video walkthrough](https://www.youtube.com/watch?v=sU24kCXdFng)
 
 
 
@@ -49,8 +41,8 @@ Each service contains a **Dockerfile** to enable containerization, and the `dock
 ### Installation
 1. **Clone the repository:**  
    ```sh
-   git clone https://github.com/rakeshkanneeswaran/EduVerseAI.git
-   cd EduVerseAI
+   git clone https://github.com/rakeshkanneeswaran/CourseCopilot.git
+   cd CourseCopilot
    ```  
 2. **Install dependencies:**  
    Each microservice contains its own `setup.md` file with installation instructions.  
